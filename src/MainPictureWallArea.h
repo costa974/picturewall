@@ -23,6 +23,11 @@
 #include <QGraphicsView>
 #include <QtGui>
 
+struct ScaledImageInfo
+{
+	QImage m_ScaledImage;
+	QString m_ScaledImagePath;	
+};
 
 /**
 	@author vishwajeet <vishwajeet.dusane@gmail.com>
@@ -61,7 +66,7 @@ public slots:
       void changeZoomLevelByFactor(int factor,EZoomFocus zoom);
 
 	// Scrolling animation slots 
-      void updateScrollingAnimationStep(qreal steps);
+      void updateScrollingAnimationStep(int steps);
       void scrollingAnimationStateChanged(QTimeLine::State);
       void scrollingAnimationFinsihed();		
 
@@ -76,7 +81,7 @@ private:
 	void zoom(EZoomFocus zoom);
 
 private:
-	QFutureWatcher<QImage> *m_pImageScaling; 
+	QFutureWatcher<ScaledImageInfo> *m_pImageScaling; 
 	int m_Row;
 	int m_Column;
 	QGraphicsScene m_GraphicsScene;

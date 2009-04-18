@@ -21,40 +21,77 @@
 
 
 #include "ImageProxyWidget.h"
+#include "ImageHolder.h"
+
+#include "CustomLabel.h"
+#include "CustomProxy.h"
 
 
 // Global Variable
-const int ImageWidth = 200;
-const int ImageHeight = 150;
+const int ImageWidth = 150;
+const int ImageHeight = 100;
 // Global Functions
-QImage MyScale(const QString &imageFileName )
+ScaledImageInfo MyScale(const QString &imageFileName )
 {
+	ScaledImageInfo result;
 	QImage image ( imageFileName );
-	return image.scaled ( QSize ( ImageWidth, ImageHeight), Qt::IgnoreAspectRatio, Qt::SmoothTransformation );
+	result.m_ScaledImage = image.scaled ( QSize ( ImageWidth, ImageHeight), Qt::KeepAspectRatio, Qt::SmoothTransformation );
+	result.m_ScaledImagePath = imageFileName;
+
+	return result;
 }
+
+
+static QImage *mirrorImage (const QImage *image) {
+	QImage *tmpImage = new QImage(image->mirrored(false, true));
+
+	QPoint p1, p2;
+	p2.setY(tmpImage->height());
+	
+	QLinearGradient gradient(p1, p2);
+	gradient.setColorAt(0, Qt::transparent);
+	gradient.setColorAt(1, QColor(0, 0, 0, 255));
+
+	QPainter p(tmpImage);
+	//p.setCompositionMode(QPainter::CompositionMode_Lighten);
+	p.fillRect(0, 0, tmpImage->width(), tmpImage->height(), gradient);
+
+	gradient.setColorAt(0,QColor(0, 0, 0, 255));
+	gradient.setColorAt(1, Qt::transparent);
+	p.fillRect(0,0, tmpImage->width(), tmpImage->height(), gradient);
+
+	p.end();
+
+	return(tmpImage);
+}
+
 
 
 CMainPictureWallArea::CMainPictureWallArea(QWidget *parent)
  : QGraphicsView(parent),m_Row(0),m_Column(0)
 {
 
-	m_pImageScaling = new QFutureWatcher<QImage> ( this );
+	m_pImageScaling = new QFutureWatcher<ScaledImageInfo> ( this );
 
 	m_CurrentZoomLevel=ZoomLevel100;
+
+	m_MouseButtonPressed = false;
 
 	this->setScene ( &m_GraphicsScene );
 
 	this->setRenderHints ( QPainter::Antialiasing | QPainter::SmoothPixmapTransform | QPainter::HighQualityAntialiasing | QPainter::TextAntialiasing);
 
+	this->setCacheMode ( QGraphicsView::CacheNone );
+	this->setViewportUpdateMode ( QGraphicsView::FullViewportUpdate );
 
-	m_pScrollingAnimation = new QTimeLine ( 1000,this );
-	m_pScrollingAnimation->setFrameRange(0,1);
-	m_pScrollingAnimation->setCurveShape(QTimeLine::EaseOutCurve);
+	m_pScrollingAnimation = new QTimeLine ( 500,this );
+	m_pScrollingAnimation->setFrameRange(0,10);
+	m_pScrollingAnimation->setCurveShape(QTimeLine::LinearCurve);
 	m_pScrollingAnimation->setLoopCount ( 1 );
 	//timeLine->setCurveShape(QTimeLine::EaseInCurve); horizontalLayout->setMargin(0);
-
-	connect ( m_pScrollingAnimation, SIGNAL ( valueChanged ( qreal ) ),
-	          this, SLOT ( updateScrollingAnimationStep ( qreal ) ) );
+	
+	connect ( m_pScrollingAnimation, SIGNAL ( frameChanged ( int ) ),
+	          this, SLOT ( updateScrollingAnimationStep ( int ) ) );
 	connect ( m_pScrollingAnimation, SIGNAL ( stateChanged ( QTimeLine::State ) ),
 	          this, SLOT ( scrollingAnimationStateChanged ( QTimeLine::State ) ) );
 	connect ( m_pScrollingAnimation, SIGNAL ( finished() ),
@@ -95,11 +132,18 @@ void CMainPictureWallArea::loadImagesFromDirectoryRecursivelySlot(QString direct
 void CMainPictureWallArea::showImageOnWallAtPosition(int num)
 {
 
-	//CGraphicsPixmapItem *imageItem = new CGraphicsPixmapItem();
-	QLabel *imageItem = new QLabel();
-	CImageProxyWidget *pCImageProxyWidgetInstance = new CImageProxyWidget();
+ //TODO same code is reapeated for reflcetion, make 1 function and call in it
 
-	imageItem->setPixmap(QPixmap::fromImage(m_pImageScaling->resultAt ( num )));
+
+	CustomProxy *pCImageProxyWidgetInstance = new CustomProxy(0, Qt::Window );
+	//CImageProxyWidget *pCImageProxyWidgetInstance = new CImageProxyWidget(0, Qt::Window );
+
+	CustomLabel *imageItem = new CustomLabel();
+
+	ScaledImageInfo result = m_pImageScaling->resultAt ( num );
+
+	imageItem->setPixmap(QPixmap::fromImage(result.m_ScaledImage));
+	imageItem->setImagePath(result.m_ScaledImagePath);
 
 	if(m_Row >= 3)
 	{
@@ -108,24 +152,46 @@ void CMainPictureWallArea::showImageOnWallAtPosition(int num)
 				
 	}
 
-	if(m_Row == 3)
-	{
-		pCImageProxyWidgetInstance->setReflection(true);
-	}
-
 	QRectF rect = pCImageProxyWidgetInstance->boundingRect();
 	rect.setWidth(ImageWidth+20);
 	rect.setHeight(ImageHeight+20);
 
 	pCImageProxyWidgetInstance->setWidget(imageItem);
-	pCImageProxyWidgetInstance->setPos(m_Column * rect.width() * 1.05, m_Row * rect.height() * 1.05 );
+	pCImageProxyWidgetInstance->setPos(m_Column * rect.width() * 1.05, m_Row * rect.height() * 1.3 );
 	pCImageProxyWidgetInstance->setCacheMode ( QGraphicsItem::NoCache );
 
 	m_GraphicsScene.addItem ( pCImageProxyWidgetInstance );
-	m_GraphicsScene.setSceneRect ( m_GraphicsScene.itemsBoundingRect() );
-
+	//m_GraphicsScene.setSceneRect ( m_GraphicsScene.itemsBoundingRect() );
 
 	m_Row ++;
+
+	if(m_Row == 3)
+	{
+		
+		QLabel *imageReflcetionItem = new QLabel();
+		//CImageProxyWidget *pCImageProxyWidgetReflectionInstance = new CImageProxyWidget();
+		CustomProxy *pCImageProxyWidgetReflectionInstance = new CustomProxy(0, Qt::Window );
+	
+		QImage *img = new QImage(result.m_ScaledImage);
+	
+		img = mirrorImage(img);
+
+		imageReflcetionItem->setPixmap(QPixmap::fromImage(*img));
+	
+
+		QRectF rect = pCImageProxyWidgetReflectionInstance->boundingRect();
+		rect.setWidth(ImageWidth+20);
+		rect.setHeight(ImageHeight+20);
+	
+		pCImageProxyWidgetReflectionInstance->setWidget(imageReflcetionItem);
+		pCImageProxyWidgetReflectionInstance->setPos(m_Column * rect.width() * 1.05, (m_Row) * rect.height() * 1.3 );
+		pCImageProxyWidgetReflectionInstance->setCacheMode ( QGraphicsItem::ItemCoordinateCache);
+	
+		m_GraphicsScene.addItem ( pCImageProxyWidgetReflectionInstance );
+		m_GraphicsScene.setSceneRect ( m_GraphicsScene.itemsBoundingRect());
+		//pCImageProxyWidgetReflectionInstance->setReflection(true);
+	}
+
 }
 
 
@@ -137,7 +203,7 @@ void CMainPictureWallArea::changeZoomLevelByFactor(int factor,EZoomFocus zoom)
 
 	if(zoom == IN)
 	{
-		zoomFactor = 1.5;
+		zoomFactor = 1;
 	}else
 	{
 		zoomFactor = 0.5;
@@ -145,8 +211,9 @@ void CMainPictureWallArea::changeZoomLevelByFactor(int factor,EZoomFocus zoom)
 
 		     this->setTransform ( QTransform() 
 	             .translate ( this->contentsRect().width() , this->contentsRect().height() )
-                     .scale ( zoomFactor , zoomFactor )
-                      .translate ( -this->contentsRect().width() , -this->contentsRect().height() ));
+                 .scale ( zoomFactor , zoomFactor )
+                 .translate ( -this->contentsRect().width() , -this->contentsRect().height() ));
+
 	this->zoom(zoom);
 }
 
@@ -196,8 +263,11 @@ void CMainPictureWallArea::zoom(EZoomFocus zoom)
 	}		
 }
 
-void CMainPictureWallArea::updateScrollingAnimationStep(qreal steps)
+void CMainPictureWallArea::updateScrollingAnimationStep(int steps)
 {
+
+	this->horizontalScrollBar()->setValue(this->horizontalScrollBar()->value() + steps);
+/*
 	QRectF r = contentsRect ();
 	qreal roatioinAngle = steps * 30;	
 
@@ -205,6 +275,7 @@ void CMainPictureWallArea::updateScrollingAnimationStep(qreal steps)
 	                     .translate ( r.width() / 2, r.height() / 2 )
 	                     .rotate( roatioinAngle, Qt::YAxis)
 	                     .translate ( -r.width() / 2, -r.height() / 2 ));
+*/
 }
 
 void CMainPictureWallArea::scrollingAnimationStateChanged(QTimeLine::State)
@@ -214,12 +285,15 @@ void CMainPictureWallArea::scrollingAnimationStateChanged(QTimeLine::State)
 
 void CMainPictureWallArea::scrollingAnimationFinsihed()
 {
+/*
 		if ( m_pScrollingAnimation->direction() == QTimeLine::Forward )
 		{
 			//qDebug("Animation not running so start it in forward direction");
 			m_pScrollingAnimation->setDirection ( QTimeLine::Backward );
 			m_pScrollingAnimation->start();
 		}
+*/
+
 }
 
 
@@ -252,6 +326,7 @@ void CMainPictureWallArea::mousePressEvent ( QMouseEvent *e)
 		m_MouseDeltaValueForPressedEvent = e->x();
 		m_MouseButtonPressed = true;
 	}
+	QGraphicsView::mousePressEvent (e);
 }
 
 void CMainPictureWallArea::mouseReleaseEvent ( QMouseEvent *e )
@@ -260,17 +335,27 @@ void CMainPictureWallArea::mouseReleaseEvent ( QMouseEvent *e )
 	{
 		m_MouseButtonPressed = false;
 	}
+
+	QGraphicsView::mouseReleaseEvent(e);
 }
 
 void CMainPictureWallArea::mouseMoveEvent ( QMouseEvent *e )
 {
 	int direction;
+	int dosumentLength =  this->horizontalScrollBar()->maximum() - this->horizontalScrollBar()->minimum() + this->horizontalScrollBar()->pageStep();
 	if(m_MouseButtonPressed)
 	{
 		direction = m_MouseDeltaValueForPressedEvent -e->x();
+		qDebug("direction = %d , %d",direction,this->horizontalScrollBar()->pageStep());
+		
+	
  		if(direction > 0)
 		{
-			this->horizontalScrollBar()->setValue(this->horizontalScrollBar()->value() + 10);
+			
+			m_pScrollingAnimation->setFrameRange(0,direction + 60);	
+			
+			m_pScrollingAnimation->start();
+			//this->horizontalScrollBar()->setValue(this->horizontalScrollBar()->value() + 10);
 			
 			/*
 			if(m_pScrollingAnimation->state() == QTimeLine::NotRunning )
@@ -281,11 +366,16 @@ void CMainPictureWallArea::mouseMoveEvent ( QMouseEvent *e )
 			*/
 		}else
 		{
-			this->horizontalScrollBar()->setValue(this->horizontalScrollBar()->value() - 10);
+			m_pScrollingAnimation->setFrameRange(0,-direction- 60);	
+			m_pScrollingAnimation->start();
+	
+			//this->horizontalScrollBar()->setValue(this->horizontalScrollBar()->value() - 10);
 		}
 
 		m_MouseDeltaValueForPressedEvent=e->x();
 	}
+
+	QGraphicsView::mouseMoveEvent(e);
 }
 
 

@@ -37,9 +37,11 @@ public:
 	void setReflection(const bool &reflectionFlag);
 	bool reflection();
 
-
 protected:
   virtual void paint ( QPainter *, const QStyleOptionGraphicsItem *, QWidget * );
+  virtual void paintWindowFrame(QPainter *painter, const QStyleOptionGraphicsItem *option,QWidget *widget);              
+
+  virtual void mousePressEvent ( QGraphicsSceneMouseEvent *event );	
 
 private:
 	bool relectionOn;

@@ -18,6 +18,7 @@
  *   59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.             *
  ***************************************************************************/
 #include "ImageProxyWidget.h"
+#include "CustomLabel.h"
 
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
@@ -39,69 +40,23 @@ CImageProxyWidget::~CImageProxyWidget()
 
 void CImageProxyWidget::paint ( QPainter *pPainter, const QStyleOptionGraphicsItem *pStyleOptionGraphicsItem, QWidget *pWidget )
 {
-
-	QPen pen;  // creates a default pen
-
-	pen.setStyle(Qt::SolidLine);
-	pen.setWidth(3);
-	pen.setBrush(Qt::white);
-	pen.setCapStyle(Qt::RoundCap);
-	pen.setJoinStyle(Qt::RoundJoin);
-	
-	pPainter->setPen(pen);
-
-	pPainter->drawRoundedRect(this->boundingRect().x(), this->boundingRect().y(), this->boundingRect().width(), this->boundingRect().height(), 0, 0);
-
-
-	if(relectionOn)
+	if(!this->reflection())
 	{
-		double pi = 3.14159;
-		double a    = (pi/180.0) * 180.0;
-		double sina = sin(2.0*a);
-		double cosa = cos(2.0*a);
-		int reflexLgh =0;
-
-		QColor colorBg = Qt::black;
-		QColor colorTx = Qt::white;
-		QColor reflexColorBg = Qt::green;;
-		QColor reflexColorBord ;
-		QColor reflexColorFst;
-		QColor reflexColorSnd;
-		QColor reflexColorTx;
-
-		int alphaFst =20;
-		int alphaSnd =120 ;
-		int alphaTxt =100 ;
-		int sizeTx = 0;
-
-		QTransform reflex(cosa, sina, sina, cosa, 0, 0);
-		pPainter->setTransform(reflex);
-		pPainter->shear(0, 0.5);
+		QPen pen;  // creates a default pen
+	
+		pen.setStyle(Qt::SolidLine);
+		pen.setWidth(6);
+		pen.setBrush(Qt::white);
+		pen.setCapStyle(Qt::RoundCap);
+		pen.setJoinStyle(Qt::RoundJoin);
 		
-		
-		QLinearGradient linGrad2(0, -15-reflexLgh, 0, -5-(reflexLgh/2));
-		reflexColorFst = colorBg;
-		reflexColorSnd = colorBg;
-		reflexColorBord = colorBg;
-		reflexColorFst.setAlpha(alphaFst);
-		reflexColorSnd.setAlpha(alphaSnd);
-		reflexColorBord.setAlpha(10);
-		reflexColorTx = colorTx;
-		reflexColorTx.setAlpha(alphaTxt);
-		
-		linGrad2.setColorAt(0, reflexColorFst);
-		linGrad2.setColorAt(1, reflexColorSnd);
-		linGrad2.setSpread(QGradient::PadSpread);
-		pPainter->setBrush(linGrad2);
-		pPainter->setPen(QPen(reflexColorBord));
-		pPainter->drawRect(this->x(), this->y(), this->boundingRect().width()+80, this->boundingRect().height()+15+reflexLgh);
-
-		QRectF R2 (this->x(), this->y(), this->boundingRect().width()+80, this->boundingRect().height()+15+reflexLgh);
-		pPainter->setPen(QPen(reflexColorTx));
-		pPainter->drawText(R2, Qt::AlignCenter, "Vishwajeet");
+		pPainter->setPen(pen);
+	
+		pPainter->drawRoundedRect(this->boundingRect().x(), this->boundingRect().y(), this->boundingRect().width(), this->boundingRect().height(), 0, 0);
 	}
 
-
+	   const QBrush color(QColor(0, 0, 255,0),Qt::Dense4Pattern);
+   
 	QGraphicsProxyWidget::paint(pPainter,pStyleOptionGraphicsItem,pWidget);
 }
 
@@ -115,3 +70,21 @@ bool CImageProxyWidget::reflection()
 	return relectionOn;
 }
 
+void CImageProxyWidget::paintWindowFrame(QPainter *painter, const QStyleOptionGraphicsItem *option,
+                                   QWidget *widget)
+{
+
+
+
+	    QGraphicsProxyWidget::paintWindowFrame(painter, option, widget);
+}
+
+
+void CImageProxyWidget::mousePressEvent ( QGraphicsSceneMouseEvent *event )
+{
+	CustomLabel *c = (CustomLabel *)this->widget();
+
+	c->setImagePath("I Am CLICKED");
+
+	QGraphicsProxyWidget::mousePressEvent(event);
+}

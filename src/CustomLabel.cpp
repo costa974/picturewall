@@ -33,7 +33,7 @@ CustomLabel::CustomLabel(QWidget *parent)
     
     label = new CImageHolder(this);
     
-	 horizontalLayout->setMargin(0);
+ horizontalLayout->setMargin(0);
      horizontalLayout->addWidget(label);
 }
 

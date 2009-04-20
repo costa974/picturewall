@@ -114,7 +114,12 @@ void CMainPictureWallArea::loadImagesFromDirectoryRecursivelySlot(QString direct
 
 	filter << "*.jpg" << "*.png" << "*.bmp" << "*.gif" << "*.jpeg" << "*.pbm" << "*.xmp" << "*.xbm";
 
+	
 	m_GraphicsScene.clear();
+	
+	this->setScene(&m_GraphicsScene);
+	
+	m_GraphicsScene.setSceneRect(m_GraphicsScene.itemsBoundingRect());
 	m_Row =0;
 	m_Column=0;
 	
@@ -159,8 +164,9 @@ void CMainPictureWallArea::showImageOnWallAtPosition(int num)
 	pCImageProxyWidgetInstance->setWidget(imageItem);
 	pCImageProxyWidgetInstance->setPos(m_Column * rect.width() * 1.05, m_Row * rect.height() * 1.3 );
 	pCImageProxyWidgetInstance->setCacheMode ( QGraphicsItem::NoCache );
-
+	pCImageProxyWidgetInstance->setDefaultItemGeometry(pCImageProxyWidgetInstance->geometry());
 	m_GraphicsScene.addItem ( pCImageProxyWidgetInstance );
+	
 	//m_GraphicsScene.setSceneRect ( m_GraphicsScene.itemsBoundingRect() );
 
 	QObject::connect(pCImageProxyWidgetInstance,SIGNAL(imageZoomedIn()),imageItem,SLOT(imageZoomedIn()));
@@ -173,7 +179,7 @@ void CMainPictureWallArea::showImageOnWallAtPosition(int num)
 		
 		QLabel *imageReflcetionItem = new QLabel();
 		//CImageProxyWidget *pCImageProxyWidgetReflectionInstance = new CImageProxyWidget();
-		CustomProxy *pCImageProxyWidgetReflectionInstance = new CustomProxy(0, Qt::Window );
+		QGraphicsProxyWidget *pCImageProxyWidgetReflectionInstance = new QGraphicsProxyWidget(0, Qt::Window );
 	
 		QImage *img = new QImage(result.m_ScaledImage);
 	
@@ -189,8 +195,9 @@ void CMainPictureWallArea::showImageOnWallAtPosition(int num)
 		pCImageProxyWidgetReflectionInstance->setWidget(imageReflcetionItem);
 		pCImageProxyWidgetReflectionInstance->setPos(m_Column * rect.width() * 1.05, (m_Row) * rect.height() * 1.3 );
 		pCImageProxyWidgetReflectionInstance->setCacheMode ( QGraphicsItem::ItemCoordinateCache);
-	
+		
 		m_GraphicsScene.addItem ( pCImageProxyWidgetReflectionInstance );
+		
 		//m_GraphicsScene.setSceneRect ( m_GraphicsScene.itemsBoundingRect());
 		//pCImageProxyWidgetReflectionInstance->setReflection(true);
 	}

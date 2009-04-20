@@ -43,7 +43,7 @@
 CustomProxy::CustomProxy(QGraphicsItem *parent, Qt::WindowFlags wFlags)
     : QGraphicsProxyWidget(parent, wFlags), popupShown(false)
 {
-    timeLine = new QTimeLine(1000, this);
+    timeLine = new QTimeLine(500, this);
     connect(timeLine, SIGNAL(valueChanged(qreal)),
             this, SLOT(updateStep(qreal)));
     connect(timeLine, SIGNAL(stateChanged(QTimeLine::State)),
@@ -53,6 +53,7 @@ CustomProxy::CustomProxy(QGraphicsItem *parent, Qt::WindowFlags wFlags)
 	
 
 	fullScreen = false;
+	
 }
 
 QRectF CustomProxy::boundingRect() const
@@ -98,6 +99,18 @@ void CustomProxy::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
                                    QWidget *widget)
 {
 
+		QPen pen;  // creates a default pen
+	
+		pen.setStyle(Qt::SolidLine);
+		pen.setWidth(6);
+		pen.setBrush(Qt::white);
+		pen.setCapStyle(Qt::RoundCap);
+		pen.setJoinStyle(Qt::RoundJoin);
+		
+		painter->setPen(pen);
+	
+		painter->drawRoundedRect(this->boundingRect().x(), this->boundingRect().y(), this->boundingRect().width(), this->boundingRect().height(), 0, 0);
+
 /*
     const QColor color(255, 255, 255, 255);
    
@@ -132,43 +145,47 @@ void CustomProxy::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
 
 void CustomProxy::mousePressEvent ( QGraphicsSceneMouseEvent *event )
 {
-	qDebug("FULL SCREEN");
-	QGraphicsProxyWidget::mousePressEvent(event);
     scene()->setActiveWindow(this);
-	if(fullScreen)
-	{
-		widget()->resize(80,80);
-		fullScreen= false;
-	}else
-	{
-		widget()->showMaximized ();
-		fullScreen= true;
-	}
+    if(!popupShown)	
+    {
+	
+	if (timeLine->currentValue() != 1)
+		zoomIn();
+    }else
+    {
+	
+	zoomOut();
+    }		
 }
 
 void CustomProxy::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
 {
     QGraphicsProxyWidget::hoverEnterEvent(event);
-    scene()->setActiveWindow(this);
-    if (timeLine->currentValue() != 1)
-        zoomIn();
 }
 
 void CustomProxy::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
 {
     QGraphicsProxyWidget::hoverLeaveEvent(event);
-    if (!popupShown && (timeLine->direction() != QTimeLine::Backward || timeLine->currentValue() != 0))
+
+    if (popupShown && (timeLine->direction() != QTimeLine::Backward || timeLine->currentValue() != 0))
         zoomOut();
 }
 
 bool CustomProxy::sceneEventFilter(QGraphicsItem *watched, QEvent *event)
 {
+/*	
     if (watched->isWindow() && (event->type() == QEvent::UngrabMouse || event->type() == QEvent::GrabMouse)) {
         popupShown = watched->isVisible();
         if (!popupShown && !isUnderMouse())
             zoomOut();
     }
+*/
     return QGraphicsProxyWidget::sceneEventFilter(watched, event);
+}
+
+void CustomProxy::setDefaultItemGeometry(const QRectF &geometry)
+{
+		m_ItemGeometry = geometry;
 }
 
 QVariant CustomProxy::itemChange(GraphicsItemChange change, const QVariant &value)
@@ -214,14 +231,15 @@ void CustomProxy::updateStep(qreal step)
 		{
 			this->scene()->views().at(0)->verticalScrollBar()->setValue(this->scene()->views().at(0)->verticalScrollBar()->value()+5);
 		}
-		this->setGeometry(QRectF(this->x() + 20,this->y()+ 20,this->geometry().width()-40,this->geometry().height()-40));
-		//emit imageZoomedOut();
+		this->setGeometry(QRectF(this->geometry().x() + 20.5,this->geometry().y()+ 10.5,this->geometry().width()-80.5,this->geometry().height()-40.5));
+		emit imageZoomedOut();
 	}else
 	{
 		//emit imageZoomedIn();
-		this->setGeometry(QRectF(this->x()- 20,this->y()- 20,this->geometry().width()+40,this->geometry().height()+40));
+		this->setGeometry(QRectF(this->geometry().x()- 20.5,this->geometry().y()- 10.5,this->geometry().width()+80.5,this->geometry().height()+40.5));
 	}
 
+	this->scene()->setSceneRect(this->scene()->itemsBoundingRect());
 	this->scene()->views().at(0)->ensureVisible(this,0,0);
 
 	//this->setGeometry(QRectF(this->x(),this->y(),this->geometry().width()+1 + 1.5 * step ,this->geometry().height()+1 + 1.5 * step ));
@@ -242,7 +260,8 @@ void CustomProxy::stateChanged(QTimeLine::State state)
 
 void CustomProxy::zoomIn()
 {
-	
+
+popupShown =true;		
     if (timeLine->direction() != QTimeLine::Forward)
         timeLine->setDirection(QTimeLine::Forward);
     if (timeLine->state() == QTimeLine::NotRunning) 
@@ -252,7 +271,7 @@ void CustomProxy::zoomIn()
 
 void CustomProxy::zoomOut()
 {
-
+popupShown =false;
     if (timeLine->direction() != QTimeLine::Backward)
         timeLine->setDirection(QTimeLine::Backward);
     if (timeLine->state() == QTimeLine::NotRunning) 
@@ -269,6 +288,7 @@ void CustomProxy::animationFinished()
 			this->scene()->views().at(0)->verticalScrollBar()->setValue(this->scene()->views().at(0)->verticalScrollBar()->maximum());
 		}
 		emit imageZoomedOut();
+			this->setGeometry(m_ItemGeometry);
 	}
 
 	if(timeLine->direction() == QTimeLine::Forward)

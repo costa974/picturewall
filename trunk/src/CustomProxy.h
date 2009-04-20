@@ -51,7 +51,9 @@ public:
     void paintWindowFrame(QPainter *painter, const QStyleOptionGraphicsItem *option,
                           QWidget *widget);                          
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
-                          QWidget *widget);                          
+                          QWidget *widget);
+
+    void setDefaultItemGeometry(const QRectF &geometry);	
 
 protected:
     void hoverEnterEvent(QGraphicsSceneHoverEvent *event);
@@ -75,6 +77,7 @@ private:
     QTimeLine *timeLine;
     bool fullScreen;
     bool popupShown;
+    QRectF m_ItemGeometry;
 };
 
 #endif

@@ -26,7 +26,7 @@
 #include <QWheelEvent>
 
 CustomLabel::CustomLabel(QWidget *parent)
- : QWidget(parent)
+ : QDialog(parent)
 {
 	
     QHBoxLayout *horizontalLayout = new QHBoxLayout(this);

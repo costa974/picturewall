@@ -28,7 +28,7 @@
 /**
 	@author Vishwajeet <gokul@linux-7q2y>
 */
-class CustomLabel : public QWidget
+class CustomLabel : public QDialog
 {
 		Q_OBJECT
 public:

@@ -188,9 +188,10 @@ void CMainPictureWallArea::showImageOnWallAtPosition(int num)
 		pCImageProxyWidgetReflectionInstance->setCacheMode ( QGraphicsItem::ItemCoordinateCache);
 	
 		m_GraphicsScene.addItem ( pCImageProxyWidgetReflectionInstance );
-		m_GraphicsScene.setSceneRect ( m_GraphicsScene.itemsBoundingRect());
+		//m_GraphicsScene.setSceneRect ( m_GraphicsScene.itemsBoundingRect());
 		//pCImageProxyWidgetReflectionInstance->setReflection(true);
 	}
+
 
 }
 

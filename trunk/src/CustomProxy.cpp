@@ -35,7 +35,7 @@
 **
 ****************************************************************************/
 
-#include "customproxy.h"
+#include "CustomProxy.h"
 
 #include <QtGui>
 #include "CustomLabel.h"
@@ -43,7 +43,7 @@
 CustomProxy::CustomProxy(QGraphicsItem *parent, Qt::WindowFlags wFlags)
     : QGraphicsProxyWidget(parent, wFlags), popupShown(false)
 {
-    timeLine = new QTimeLine(1000, this);
+    timeLine = new QTimeLine(500, this);
     connect(timeLine, SIGNAL(valueChanged(qreal)),
             this, SLOT(updateStep(qreal)));
     connect(timeLine, SIGNAL(stateChanged(QTimeLine::State)),
@@ -63,6 +63,8 @@ QRectF CustomProxy::boundingRect() const
 void CustomProxy::paintWindowFrame(QPainter *painter, const QStyleOptionGraphicsItem *option,
                                    QWidget *widget)
 {
+
+/*
     const QBrush color(QColor(0, 0, 255,0),Qt::Dense4Pattern);
    
     QRectF r = windowFrameRect();
@@ -85,8 +87,8 @@ void CustomProxy::paintWindowFrame(QPainter *painter, const QStyleOptionGraphics
 	
         painter->fillRect(right, color);
     }
-
-    QGraphicsProxyWidget::paintWindowFrame(painter, option, widget);
+*/
+   // QGraphicsProxyWidget::paintWindowFrame(painter, option, widget);
     
 }
 
@@ -94,6 +96,8 @@ void CustomProxy::paintWindowFrame(QPainter *painter, const QStyleOptionGraphics
 void CustomProxy::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
                                    QWidget *widget)
 {
+
+/*
     const QColor color(255, 255, 255, 255);
    
    QRectF r = windowFrameRect();
@@ -117,8 +121,11 @@ void CustomProxy::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
         painter->fillRect(right, color);
     }
 
+*/
 
+ 
     QGraphicsProxyWidget::paint(painter, option, widget);
+ //QGraphicsProxyWidget::paintWindowFrame(painter, option, widget);
    
 }
 
@@ -188,15 +195,32 @@ void CustomProxy::updateStep(qreal step)
                  .translate(-r.width() / 2, -r.height() / 2));
 */
 
-    //qDebug("emitter itemChaned %f\n",step);	
+    //qDebug("emitter itemChaned %f\n",step);
 
-   setTransform(QTransform()
+	int centerX = 800 /2 + (this->geometry().x());
+	int centerY = 600 /2 + (this->geometry().y());
+
+		
+	setTransform(QTransform()
                  .translate(r.width() / 2, r.height() / 2)
-                 .rotate(step * 30, Qt::XAxis)
+                 /*.rotate(step * 30, Qt::XAxis)
                  .rotate(step * 10, Qt::YAxis)
-                 .rotate(step * 5, Qt::ZAxis)
-                 .scale(1 + 1.5 * step , 1 + 1.5 * step )
-                 .translate(-r.width() / 2, -r.height() / 2));
+                 .rotate(step * 5, Qt::ZAxis)*/
+                .scale(1 + 4.5 * step , 1 + 4.5 * step )
+                .translate(-r.width() / 2, -r.height() / 2));
+	
+
+	if(timeLine->direction() == QTimeLine::Backward)
+	{
+		if(this->scene()->views().at(0)->verticalScrollBar() != NULL)
+		{
+			this->scene()->views().at(0)->verticalScrollBar()->setValue(this->scene()->views().at(0)->verticalScrollBar()->value()+5);
+		}	
+	}
+
+	this->scene()->views().at(0)->ensureVisible(this,0,0);
+
+	//this->setGeometry(QRectF(this->x(),this->y(),this->geometry().width()+1 + 1.5 * step ,this->geometry().height()+1 + 1.5 * step ));
 
 }
 
@@ -219,6 +243,8 @@ void CustomProxy::zoomIn()
         timeLine->setDirection(QTimeLine::Forward);
     if (timeLine->state() == QTimeLine::NotRunning) 
         timeLine->start();
+
+	
 
 }
 

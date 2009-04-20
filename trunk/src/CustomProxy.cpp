@@ -43,12 +43,13 @@
 CustomProxy::CustomProxy(QGraphicsItem *parent, Qt::WindowFlags wFlags)
     : QGraphicsProxyWidget(parent, wFlags), popupShown(false)
 {
-    timeLine = new QTimeLine(500, this);
+    timeLine = new QTimeLine(1000, this);
     connect(timeLine, SIGNAL(valueChanged(qreal)),
             this, SLOT(updateStep(qreal)));
     connect(timeLine, SIGNAL(stateChanged(QTimeLine::State)),
             this, SLOT(stateChanged(QTimeLine::State)));
-	
+   connect(timeLine, SIGNAL(finished ()),
+            this, SLOT(animationFinished()));	
 	
 
 	fullScreen = false;
@@ -197,25 +198,28 @@ void CustomProxy::updateStep(qreal step)
 
     //qDebug("emitter itemChaned %f\n",step);
 
-	int centerX = 800 /2 + (this->geometry().x());
-	int centerY = 600 /2 + (this->geometry().y());
-
 		
-	setTransform(QTransform()
+	/*setTransform(QTransform()
                  .translate(r.width() / 2, r.height() / 2)
                  /*.rotate(step * 30, Qt::XAxis)
                  .rotate(step * 10, Qt::YAxis)
                  .rotate(step * 5, Qt::ZAxis)*/
-                .scale(1 + 4.5 * step , 1 + 4.5 * step )
+     /*           .scale(1 + 4.5 * step , 1 + 4.5 * step )
                 .translate(-r.width() / 2, -r.height() / 2));
-	
+	*/
 
 	if(timeLine->direction() == QTimeLine::Backward)
 	{
 		if(this->scene()->views().at(0)->verticalScrollBar() != NULL)
 		{
 			this->scene()->views().at(0)->verticalScrollBar()->setValue(this->scene()->views().at(0)->verticalScrollBar()->value()+5);
-		}	
+		}
+		this->setGeometry(QRectF(this->x() + 20,this->y()+ 20,this->geometry().width()-40,this->geometry().height()-40));
+		//emit imageZoomedOut();
+	}else
+	{
+		//emit imageZoomedIn();
+		this->setGeometry(QRectF(this->x()- 20,this->y()- 20,this->geometry().width()+40,this->geometry().height()+40));
 	}
 
 	this->scene()->views().at(0)->ensureVisible(this,0,0);
@@ -244,8 +248,6 @@ void CustomProxy::zoomIn()
     if (timeLine->state() == QTimeLine::NotRunning) 
         timeLine->start();
 
-	
-
 }
 
 void CustomProxy::zoomOut()
@@ -255,5 +257,24 @@ void CustomProxy::zoomOut()
         timeLine->setDirection(QTimeLine::Backward);
     if (timeLine->state() == QTimeLine::NotRunning) 
         timeLine->start();
+
+}
+
+void CustomProxy::animationFinished()
+{
+	if(timeLine->direction() == QTimeLine::Backward)
+	{
+		if(this->scene()->views().at(0)->verticalScrollBar() != NULL)
+		{
+			this->scene()->views().at(0)->verticalScrollBar()->setValue(this->scene()->views().at(0)->verticalScrollBar()->maximum());
+		}
+		emit imageZoomedOut();
+	}
+
+	if(timeLine->direction() == QTimeLine::Forward)
+	{
+		this->scene()->views().at(0)->ensureVisible(this,0,0);
+		emit imageZoomedIn();
+	}
 
 }

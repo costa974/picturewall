@@ -30,115 +30,11 @@
      <property name="text" >
       <string>TextLabel</string>
      </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QLabel" name="m_pImageFileName" >
-     <property name="palette" >
-      <palette>
-       <active>
-        <colorrole role="WindowText" >
-         <brush brushstyle="SolidPattern" >
-          <color alpha="255" >
-           <red>0</red>
-           <green>0</green>
-           <blue>0</blue>
-          </color>
-         </brush>
-        </colorrole>
-        <colorrole role="Base" >
-         <brush brushstyle="SolidPattern" >
-          <color alpha="255" >
-           <red>255</red>
-           <green>255</green>
-           <blue>255</blue>
-          </color>
-         </brush>
-        </colorrole>
-        <colorrole role="Window" >
-         <brush brushstyle="SolidPattern" >
-          <color alpha="255" >
-           <red>255</red>
-           <green>255</green>
-           <blue>255</blue>
-          </color>
-         </brush>
-        </colorrole>
-       </active>
-       <inactive>
-        <colorrole role="WindowText" >
-         <brush brushstyle="SolidPattern" >
-          <color alpha="255" >
-           <red>0</red>
-           <green>0</green>
-           <blue>0</blue>
-          </color>
-         </brush>
-        </colorrole>
-        <colorrole role="Base" >
-         <brush brushstyle="SolidPattern" >
-          <color alpha="255" >
-           <red>255</red>
-           <green>255</green>
-           <blue>255</blue>
-          </color>
-         </brush>
-        </colorrole>
-        <colorrole role="Window" >
-         <brush brushstyle="SolidPattern" >
-          <color alpha="255" >
-           <red>255</red>
-           <green>255</green>
-           <blue>255</blue>
-          </color>
-         </brush>
-        </colorrole>
-       </inactive>
-       <disabled>
-        <colorrole role="WindowText" >
-         <brush brushstyle="SolidPattern" >
-          <color alpha="255" >
-           <red>118</red>
-           <green>116</green>
-           <blue>108</blue>
-          </color>
-         </brush>
-        </colorrole>
-        <colorrole role="Base" >
-         <brush brushstyle="SolidPattern" >
-          <color alpha="255" >
-           <red>255</red>
-           <green>255</green>
-           <blue>255</blue>
-          </color>
-         </brush>
-        </colorrole>
-        <colorrole role="Window" >
-         <brush brushstyle="SolidPattern" >
-          <color alpha="255" >
-           <red>255</red>
-           <green>255</green>
-           <blue>255</blue>
-          </color>
-         </brush>
-        </colorrole>
-       </disabled>
-      </palette>
-     </property>
-     <property name="autoFillBackground" >
-      <bool>true</bool>
-     </property>
-     <property name="text" >
-      <string>TextLabel</string>
-     </property>
      <property name="scaledContents" >
       <bool>true</bool>
      </property>
      <property name="alignment" >
       <set>Qt::AlignCenter</set>
-     </property>
-     <property name="wordWrap" >
-      <bool>true</bool>
      </property>
     </widget>
    </item>

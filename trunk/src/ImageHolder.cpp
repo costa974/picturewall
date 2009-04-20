@@ -38,5 +38,25 @@ void CImageHolder::setPixmap(const QPixmap &imageItem)
 
 void CImageHolder::setImagePath(const QString& path)
 {
-	m_pImageFileName->setText(QFileInfo(path).fileName());
+	m_ImagePath = path;
+//	m_pImageFileName->setText(QFileInfo(path).fileName());
 }
+
+QPixmap CImageHolder::pixmap() const
+{
+	return QPixmap(*m_pImagePlaceHolder->pixmap());
+	//return QPixmap();
+}
+
+void CImageHolder::setZoomOut()
+{
+	//this->setGeometry(this->x(),this->y(),this->width()-10,this->height()-10);
+}
+
+void CImageHolder::setOriginalPixmap()
+{
+	QImage image(m_ImagePath);
+	m_pImagePlaceHolder->setPixmap(QPixmap::fromImage(image.scaled ( QSize ( this->width(), this->height()), Qt::KeepAspectRatio, Qt::SmoothTransformation )));
+
+}
+

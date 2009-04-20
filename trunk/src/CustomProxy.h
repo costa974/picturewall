@@ -65,6 +65,11 @@ private slots:
     void stateChanged(QTimeLine::State);
     void zoomIn();
     void zoomOut();
+	void animationFinished();
+
+signals:
+	void imageZoomedIn();
+	void imageZoomedOut();
 
 private:
     QTimeLine *timeLine;

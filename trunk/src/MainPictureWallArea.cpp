@@ -163,6 +163,9 @@ void CMainPictureWallArea::showImageOnWallAtPosition(int num)
 	m_GraphicsScene.addItem ( pCImageProxyWidgetInstance );
 	//m_GraphicsScene.setSceneRect ( m_GraphicsScene.itemsBoundingRect() );
 
+	QObject::connect(pCImageProxyWidgetInstance,SIGNAL(imageZoomedIn()),imageItem,SLOT(imageZoomedIn()));
+	QObject::connect(pCImageProxyWidgetInstance,SIGNAL(imageZoomedOut()),imageItem,SLOT(imageZoomedOut()));
+
 	m_Row ++;
 
 	if(m_Row == 3)

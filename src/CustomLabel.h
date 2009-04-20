@@ -39,10 +39,13 @@ public:
 public slots:
 		void setPixmap(const QPixmap& );
 		void setImagePath(const QString&);
+		void imageZoomedIn();
+		void imageZoomedOut();
 		
 private:
 		
 		CImageHolder *label;
+		QPixmap m_VisibleImageState;
 };	
 
 #endif

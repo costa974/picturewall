@@ -35,8 +35,14 @@ public:
     ~CImageHolder();
 
     void setPixmap(const QPixmap &imageItem);
-	void setImagePath(const QString& path);
+	QPixmap pixmap() const;
+	void setOriginalPixmap();
 
+	void setImagePath(const QString& path);
+	void setZoomOut();
+
+private:
+	QString m_ImagePath;
 };
 
 #endif

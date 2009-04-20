@@ -53,3 +53,15 @@ void CustomLabel::setImagePath(const QString& path)
 	label->setImagePath(path);
 }
 
+void CustomLabel::imageZoomedIn()
+{
+	m_VisibleImageState = label->pixmap();
+	label->setOriginalPixmap();
+}
+
+void CustomLabel::imageZoomedOut()
+{
+	label->setPixmap(m_VisibleImageState);
+	//label->setZoomOut();
+}
+

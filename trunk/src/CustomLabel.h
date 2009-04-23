@@ -36,6 +36,9 @@ public:
 	virtual	~CustomLabel();
 
 
+protected:
+
+
 public slots:
 		void setPixmap(const QPixmap& );
 		void setImagePath(const QString&);

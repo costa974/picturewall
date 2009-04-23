@@ -28,13 +28,14 @@
 CustomLabel::CustomLabel(QWidget *parent)
  : QDialog(parent)
 {
-	
+	//setWindowFlags(Qt::FramelessWindowHint);
     QHBoxLayout *horizontalLayout = new QHBoxLayout(this);
     
     label = new CImageHolder(this);
     
- horizontalLayout->setMargin(0);
+	horizontalLayout->setMargin(0);	
      horizontalLayout->addWidget(label);
+
 }
 
 
@@ -45,6 +46,7 @@ CustomLabel::~CustomLabel()
 
 void CustomLabel::setPixmap(const QPixmap& image)
 {
+	m_VisibleImageState = image;
 	label->setPixmap(image);
 }
 
@@ -55,13 +57,15 @@ void CustomLabel::setImagePath(const QString& path)
 
 void CustomLabel::imageZoomedIn()
 {
-	m_VisibleImageState = label->pixmap();
+	
 	label->setOriginalPixmap();
+	
 }
 
 void CustomLabel::imageZoomedOut()
 {
 	label->setPixmap(m_VisibleImageState);
 	//label->setZoomOut();
+	
 }
 

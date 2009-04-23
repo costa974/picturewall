@@ -28,8 +28,8 @@
 
 
 // Global Variable
-const int ImageWidth = 150;
-const int ImageHeight = 100;
+const int ImageWidth = 187;
+const int ImageHeight = 106;
 // Global Functions
 ScaledImageInfo MyScale(const QString &imageFileName )
 {
@@ -114,21 +114,42 @@ void CMainPictureWallArea::loadImagesFromDirectoryRecursivelySlot(QString direct
 
 	filter << "*.jpg" << "*.png" << "*.bmp" << "*.gif" << "*.jpeg" << "*.pbm" << "*.xmp" << "*.xbm";
 
-	
+	m_pImageScaling->cancel();
+	m_pImageScaling->waitForFinished ();
 	m_GraphicsScene.clear();
+	if(this->horizontalScrollBar() != NULL)
+	{
+		this->horizontalScrollBar()->setValue(this->horizontalScrollBar()->minimum());
+	}
+
+	m_GraphicsScene.setSceneRect(QRectF(0,0,0,0));
 	
-	this->setScene(&m_GraphicsScene);
+	//this->setScene(&m_GraphicsScene);
 	
-	m_GraphicsScene.setSceneRect(m_GraphicsScene.itemsBoundingRect());
 	m_Row =0;
 	m_Column=0;
 	
-
+	
 	fileList = dir.entryList ( filter, QDir::Files );
 
 	for(int i=0;i<fileList.count();++i)
 	{
 		fileList[i] = dir.path()+QString("/")+fileList.at(i);		
+	}
+
+
+	if(fileList.isEmpty())
+	{
+		QGraphicsTextItem *textMessage = new QGraphicsTextItem("No Images Found");
+		textMessage->setFont(QFont("Times", 20));
+		textMessage->setDefaultTextColor(QColor(255,255,255,255));
+
+		textMessage->setPos(m_Column * textMessage->boundingRect().width() * 1.05, m_Row * textMessage->boundingRect().height() * 1.3 );
+		m_GraphicsScene.addItem ( textMessage );
+	
+		m_GraphicsScene.setSceneRect ( m_GraphicsScene.itemsBoundingRect() );
+		
+		return;
 	}
 
 	m_pImageScaling->setFuture(QtConcurrent::mapped(fileList,MyScale));
@@ -167,7 +188,7 @@ void CMainPictureWallArea::showImageOnWallAtPosition(int num)
 	pCImageProxyWidgetInstance->setDefaultItemGeometry(pCImageProxyWidgetInstance->geometry());
 	m_GraphicsScene.addItem ( pCImageProxyWidgetInstance );
 	
-	//m_GraphicsScene.setSceneRect ( m_GraphicsScene.itemsBoundingRect() );
+	m_GraphicsScene.setSceneRect ( m_GraphicsScene.itemsBoundingRect() );
 
 	QObject::connect(pCImageProxyWidgetInstance,SIGNAL(imageZoomedIn()),imageItem,SLOT(imageZoomedIn()));
 	QObject::connect(pCImageProxyWidgetInstance,SIGNAL(imageZoomedOut()),imageItem,SLOT(imageZoomedOut()));
@@ -359,13 +380,14 @@ void CMainPictureWallArea::mouseMoveEvent ( QMouseEvent *e )
 		direction = m_MouseDeltaValueForPressedEvent -e->x();
 		qDebug("direction = %d , %d",direction,this->horizontalScrollBar()->pageStep());
 		
-	
+		this->horizontalScrollBar()->setValue(this->horizontalScrollBar()->value() + direction);
+
  		if(direction > 0)
 		{
 			
-			m_pScrollingAnimation->setFrameRange(0,direction + 60);	
+			//m_pScrollingAnimation->setFrameRange(0,direction + 60);	
 			
-			m_pScrollingAnimation->start();
+			//m_pScrollingAnimation->start();
 			//this->horizontalScrollBar()->setValue(this->horizontalScrollBar()->value() + 10);
 			
 			/*
@@ -377,8 +399,8 @@ void CMainPictureWallArea::mouseMoveEvent ( QMouseEvent *e )
 			*/
 		}else
 		{
-			m_pScrollingAnimation->setFrameRange(0,-direction- 60);	
-			m_pScrollingAnimation->start();
+			//m_pScrollingAnimation->setFrameRange(0,-direction- 60);	
+			//m_pScrollingAnimation->start();
 	
 			//this->horizontalScrollBar()->setValue(this->horizontalScrollBar()->value() - 10);
 		}

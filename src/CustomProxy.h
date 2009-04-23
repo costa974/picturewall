@@ -61,9 +61,9 @@ protected:
     bool sceneEventFilter(QGraphicsItem *watched, QEvent *event);
     QVariant itemChange(GraphicsItemChange change, const QVariant &value);
     void mousePressEvent ( QGraphicsSceneMouseEvent *event );	
-
+	void closeEvent ( QCloseEvent * event ); 
 private slots:
-    void updateStep(qreal step);
+    void updateStep(int step);
     void stateChanged(QTimeLine::State);
     void zoomIn();
     void zoomOut();

@@ -21,6 +21,11 @@
 
 #include <QApplication>
 #include "PictureWallMainWindow.h"
+#include "ui_PictureWallMainWindow.h"
+
+extern int mainWidth;
+extern int mainHeight;
+
 
 int main(int argc, char *argv[])
 {
@@ -28,6 +33,11 @@ int main(int argc, char *argv[])
        CPictureWallMainWindow *newPictureWall = new CPictureWallMainWindow();
 
 	newPictureWall->showMaximized();
+	
+	mainWidth = newPictureWall->m_pMainPictureWallArea->geometry().width();
+	mainHeight = newPictureWall->m_pMainPictureWallArea->geometry().height();
+
+	//qDebug("Screen Size = %d , %d ",newPictureWall->m_pMainPictureWallArea->geometry().width(),newPictureWall->m_pMainPictureWallArea->geometry().height());
 
       return app.exec();
 }

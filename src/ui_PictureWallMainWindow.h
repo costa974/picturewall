@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading ui file 'PictureWallMainWindow.ui'
 **
-** Created: Mon Apr 20 20:56:16 2009
+** Created: Thu Apr 23 23:07:52 2009
 **      by: Qt User Interface Compiler version 4.4.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling ui file!

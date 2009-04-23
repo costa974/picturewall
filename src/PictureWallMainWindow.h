@@ -23,6 +23,8 @@
 #include <QWidget>
 #include "ui_PictureWallMainWindow.h"
 
+
+
 /**
 	@author vishwajeet <vishwajeet.dusane@gmail.com>
 */

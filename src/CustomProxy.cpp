@@ -44,13 +44,14 @@ CustomProxy::CustomProxy(QGraphicsItem *parent, Qt::WindowFlags wFlags)
     : QGraphicsProxyWidget(parent, wFlags), popupShown(false)
 {
     timeLine = new QTimeLine(500, this);
-    connect(timeLine, SIGNAL(valueChanged(qreal)),
-            this, SLOT(updateStep(qreal)));
+    connect(timeLine, SIGNAL(frameChanged(int)),
+            this, SLOT(updateStep(int)));
     connect(timeLine, SIGNAL(stateChanged(QTimeLine::State)),
             this, SLOT(stateChanged(QTimeLine::State)));
    connect(timeLine, SIGNAL(finished ()),
             this, SLOT(animationFinished()));	
 	
+   timeLine->setFrameRange(0,13);
 
 	fullScreen = false;
 	
@@ -58,7 +59,7 @@ CustomProxy::CustomProxy(QGraphicsItem *parent, Qt::WindowFlags wFlags)
 
 QRectF CustomProxy::boundingRect() const
 {
-    return QGraphicsProxyWidget::boundingRect().adjusted(0, 0, 10, 10);
+    return QGraphicsProxyWidget::boundingRect().adjusted(0, 10, 0, 0);
 }
 
 
@@ -90,7 +91,116 @@ void CustomProxy::paintWindowFrame(QPainter *painter, const QStyleOptionGraphics
         painter->fillRect(right, color);
     }
 */
-   // QGraphicsProxyWidget::paintWindowFrame(painter, option, widget);
+
+		
+//------------------------------------------------------------
+// Testing field
+//------------------------------------------------------------
+/*
+     const bool fillBackground = !testAttribute(Qt::WA_OpaquePaintEvent)
+                                && !testAttribute(Qt::WA_NoSystemBackground);
+    QGraphicsProxyWidget *proxy = qobject_cast<QGraphicsProxyWidget *>(this);
+    const bool embeddedWidgetFillsOwnBackground = proxy && proxy->widget();
+
+	
+    if (rect().contains(option->exposedRect)) {
+        if (fillBackground && !embeddedWidgetFillsOwnBackground)
+            painter->fillRect(option->exposedRect, palette().window());
+        return;
+    }
+
+
+    QRect windowFrameRect = QRect(QPoint(), geometry().size().toSize());
+    QStyleOptionTitleBar bar;
+    bar.QStyleOption::operator=(*option);
+	
+    bar.rect = windowFrameRect;
+
+    // translate painter to make the style happy
+    const QPointF styleOrigin = this->windowFrameRect().topLeft();
+    painter->translate(styleOrigin);
+
+#ifdef Q_WS_MAC
+    const QSize pixmapSize = windowFrameRect.size();
+    if (pixmapSize.width() <= 0 || pixmapSize.height() <= 0)
+        return;
+    QPainter *realPainter = painter;
+    QPixmap pm(pixmapSize);
+    painter = new QPainter(&pm);
+#endif
+
+    // Fill background
+    QStyleHintReturnMask mask;
+    bool setMask = style()->styleHint(QStyle::SH_WindowFrame_Mask, &bar, widget, &mask) && !mask.region.isEmpty();
+    if (setMask) {
+        painter->save();
+        painter->setClipRegion(mask.region, Qt::IntersectClip);
+    }
+    if (fillBackground) {
+        if (embeddedWidgetFillsOwnBackground) {
+            // Don't fill the background twice.
+            QPainterPath windowFrameBackground;
+            windowFrameBackground.addRect(windowFrameRect);
+            // Adjust with 0.5 to avoid border artifacts between
+            // widget background and frame background.
+            windowFrameBackground.addRect(rect().translated(-styleOrigin).adjusted(0.5, 0.5, -0.5, -0.5));
+            painter->fillPath(windowFrameBackground, palette().window());
+        } else {
+            painter->fillRect(windowFrameRect, palette().window());
+        }
+    }
+    if (setMask)
+        painter->restore();
+    painter->setRenderHint(QPainter::NonCosmeticDefaultPen);
+
+    // Draw title
+   int height = 0;//(int)d->titleBarHeight(bar);
+    bar.rect.setHeight(height);
+    painter->save();
+    style()->drawComplexControl(QStyle::CC_TitleBar, &bar, painter, widget);
+    painter->restore();
+
+    // Draw window frame
+    QStyleOptionFrame frameOptions;
+    frameOptions.QStyleOption::operator=(*option);
+    initStyleOption(&frameOptions);
+   painter->setClipRect(windowFrameRect.adjusted(0, +height, 0, 0), Qt::IntersectClip);
+       if (hasFocus()) {
+        frameOptions.state |= QStyle::State_HasFocus;
+    } else {
+        frameOptions.state &= ~QStyle::State_HasFocus;
+    }
+   
+	   bool isActive = isActiveWindow();
+    if (isActive) {
+        frameOptions.state |= QStyle::State_Active;
+    } else {
+        frameOptions.state &= ~QStyle::State_Active;
+    }
+
+    frameOptions.palette.setCurrentColorGroup(isActive ? QPalette::Active : QPalette::Normal);
+    frameOptions.rect = windowFrameRect;
+    frameOptions.lineWidth = style()->pixelMetric(QStyle::PM_MdiSubWindowFrameWidth, 0, widget);
+    frameOptions.midLineWidth = 1;
+    style()->drawPrimitive(QStyle::PE_FrameWindow, &frameOptions, painter, widget);
+
+#ifdef Q_WS_MAC
+    realPainter->drawPixmap(QPoint(), pm);
+    delete painter;
+#endif
+
+
+*/
+//------------------------------------------------------------
+//------------------------------------------------------------
+
+
+
+
+
+
+
+//		QGraphicsProxyWidget::paintWindowFrame(painter, option, widget);
     
 }
 
@@ -98,18 +208,31 @@ void CustomProxy::paintWindowFrame(QPainter *painter, const QStyleOptionGraphics
 void CustomProxy::paint(QPainter *painter, const QStyleOptionGraphicsItem *option,
                                    QWidget *widget)
 {
+/*		QPoint p1, p2;
+		p2.setX(this->geometry().height());
+		
+		QLinearGradient gradient(p1, p2);
+		gradient.setColorAt(0, QColor(255, 255, 255, 255));
+		gradient.setColorAt(1, QColor(210, 210, 210, 210));
+		gradient.setSpread(QGradient::RepeatSpread);
 
 		QPen pen;  // creates a default pen
 	
 		pen.setStyle(Qt::SolidLine);
 		pen.setWidth(6);
-		pen.setBrush(Qt::white);
+		pen.setBrush(gradient);
 		pen.setCapStyle(Qt::RoundCap);
 		pen.setJoinStyle(Qt::RoundJoin);
 		
 		painter->setPen(pen);
 	
 		painter->drawRoundedRect(this->boundingRect().x(), this->boundingRect().y(), this->boundingRect().width(), this->boundingRect().height(), 0, 0);
+*/
+
+
+
+
+
 
 /*
     const QColor color(255, 255, 255, 255);
@@ -141,6 +264,12 @@ void CustomProxy::paint(QPainter *painter, const QStyleOptionGraphicsItem *optio
     QGraphicsProxyWidget::paint(painter, option, widget);
  //QGraphicsProxyWidget::paintWindowFrame(painter, option, widget);
    
+}
+
+
+void CustomProxy::closeEvent ( QCloseEvent * event )
+{
+	event->ignore();
 }
 
 void CustomProxy::mousePressEvent ( QGraphicsSceneMouseEvent *event )
@@ -200,7 +329,7 @@ QVariant CustomProxy::itemChange(GraphicsItemChange change, const QVariant &valu
     return QGraphicsProxyWidget::itemChange(change, value);
 }
 
-void CustomProxy::updateStep(qreal step)
+void CustomProxy::updateStep(int step)
 {
     QRectF r = boundingRect();
 
@@ -225,6 +354,7 @@ void CustomProxy::updateStep(qreal step)
                 .translate(-r.width() / 2, -r.height() / 2));
 	*/
 
+	
 	if(timeLine->direction() == QTimeLine::Backward)
 	{
 		if(this->scene()->views().at(0)->verticalScrollBar() != NULL)
@@ -293,7 +423,9 @@ void CustomProxy::animationFinished()
 
 	if(timeLine->direction() == QTimeLine::Forward)
 	{
-		this->scene()->views().at(0)->ensureVisible(this,0,0);
+		//this->setGeometry(QRectF(this->geometry().x() ,this->geometry().y(),1296,736));
+		this->scene()->setSceneRect(this->scene()->itemsBoundingRect());
+		this->scene()->views().at(0)->ensureVisible(this,-1,-1);
 		emit imageZoomedIn();
 	}
 

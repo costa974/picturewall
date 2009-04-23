@@ -22,10 +22,18 @@
 
 #include <QFileDialog>
 
+int mainWidth;
+int mainHeight;
+
+//extern int mainHeight;
+//extern int mainWidth;
 CPictureWallMainWindow::CPictureWallMainWindow(QWidget *parent)
  : QWidget(parent)
 {
 	setupUi(this);
+
+	
+
 
 	connect(m_pDirectorySelectionToolButton,SIGNAL(pressed()),this,SLOT(changeDirectorySlot()));
         connect(this,SIGNAL(directoryChangedSignal(QString)),m_pMainPictureWallArea,SLOT(loadImagesFromDirectoryRecursivelySlot(QString)));
@@ -49,6 +57,7 @@ void CPictureWallMainWindow::changeDirectorySlot()
 		emit directoryChangedSignal(dir);
 	}
 	
+	qDebug("INSIDE %d, %d",mainWidth,mainHeight);
 
 }
 

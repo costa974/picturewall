@@ -32,17 +32,16 @@ Q_OBJECT
 public:
     CImageHolder(QWidget *parent = 0);
 
-    ~CImageHolder();
+    virtual ~CImageHolder();
 
     void setPixmap(const QPixmap &imageItem);
-	QPixmap pixmap() const;
-	void setOriginalPixmap();
+    QPixmap pixmap() const;
+    void setOriginalPixmap();
 
-	void setImagePath(const QString& path);
-	void setZoomOut();
+    void setImagePath(const QString& path);
 
 private:
-	QString m_ImagePath;
+    QString m_ImagePath;
 };
 
 #endif

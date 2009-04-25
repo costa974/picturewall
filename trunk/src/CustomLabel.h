@@ -1,6 +1,6 @@
 /***************************************************************************
- *   Copyright (C) 2007 by Gokul   *
- *   gokul@linux-7q2y   *
+ *   Copyright (C) 2009 by vishwajeet   *
+ *   vishwajeet.dusane@gmail.com   *
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
@@ -26,18 +26,14 @@
 #include "ImageHolder.h"
 
 /**
-	@author Vishwajeet <gokul@linux-7q2y>
+	@author vishwajeet <vishwajeet.dusane@gmail.com>
 */
 class CustomLabel : public QDialog
 {
-		Q_OBJECT
+Q_OBJECT
 public:
 	CustomLabel ( QWidget *parent = 0 );
 	virtual	~CustomLabel();
-
-
-protected:
-
 
 public slots:
 		void setPixmap(const QPixmap& );
@@ -47,7 +43,7 @@ public slots:
 		
 private:
 		
-		CImageHolder *label;
+		CImageHolder *m_pImageHolderInstance;
 		QPixmap m_VisibleImageState;
 };	
 

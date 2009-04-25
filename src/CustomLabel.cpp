@@ -28,44 +28,40 @@
 CustomLabel::CustomLabel(QWidget *parent)
  : QDialog(parent)
 {
-	//setWindowFlags(Qt::FramelessWindowHint);
     QHBoxLayout *horizontalLayout = new QHBoxLayout(this);
     
-    label = new CImageHolder(this);
+    m_pImageHolderInstance = new CImageHolder(this);
     
 	horizontalLayout->setMargin(0);	
-     horizontalLayout->addWidget(label);
+     horizontalLayout->addWidget(m_pImageHolderInstance);
 
 }
 
 
 CustomLabel::~CustomLabel()
 {
-
+	qDebug("Destructor  CustomLabel");
+	delete m_pImageHolderInstance;
 }
 
 void CustomLabel::setPixmap(const QPixmap& image)
 {
 	m_VisibleImageState = image;
-	label->setPixmap(image);
+	m_pImageHolderInstance->setPixmap(image);
 }
 
 void CustomLabel::setImagePath(const QString& path)
 {
-	label->setImagePath(path);
+	m_pImageHolderInstance->setImagePath(path);
 }
 
 void CustomLabel::imageZoomedIn()
 {
-	
-	label->setOriginalPixmap();
-	
+	m_pImageHolderInstance->setOriginalPixmap();
 }
 
 void CustomLabel::imageZoomedOut()
 {
-	label->setPixmap(m_VisibleImageState);
-	//label->setZoomOut();
-	
+	m_pImageHolderInstance->setPixmap(m_VisibleImageState);
 }
 

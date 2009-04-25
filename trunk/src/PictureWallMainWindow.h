@@ -26,6 +26,7 @@
 
 
 /**
+
 	@author vishwajeet <vishwajeet.dusane@gmail.com>
 */
 class CPictureWallMainWindow : public QWidget,public Ui::PictureWallMainWindowDesignerUI
@@ -34,7 +35,7 @@ Q_OBJECT
 public:
     CPictureWallMainWindow(QWidget *parent = 0);
 
-    ~CPictureWallMainWindow();
+    virtual ~CPictureWallMainWindow();
 public slots:
      void changeDirectorySlot();
 

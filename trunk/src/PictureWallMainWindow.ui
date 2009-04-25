@@ -1,7 +1,8 @@
-<ui version="4.0" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
  <class>PictureWallMainWindowDesignerUI</class>
- <widget class="QWidget" name="PictureWallMainWindowDesignerUI" >
-  <property name="geometry" >
+ <widget class="QWidget" name="PictureWallMainWindowDesignerUI">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
@@ -9,52 +10,55 @@
     <height>485</height>
    </rect>
   </property>
-  <property name="windowTitle" >
+  <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" >
-   <property name="margin" >
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="margin">
     <number>0</number>
    </property>
    <item>
-    <widget class="CMainPictureWallArea" name="m_pMainPictureWallArea" >
-     <property name="frameShape" >
+    <widget class="CMainPictureWallArea" name="m_pMainPictureWallArea">
+     <property name="frameShape">
       <enum>QFrame::NoFrame</enum>
      </property>
-     <property name="frameShadow" >
+     <property name="frameShadow">
       <enum>QFrame::Plain</enum>
      </property>
-     <property name="backgroundBrush" >
-      <brush brushstyle="SolidPattern" >
-       <color alpha="255" >
+     <property name="verticalScrollBarPolicy">
+      <enum>Qt::ScrollBarAlwaysOff</enum>
+     </property>
+     <property name="backgroundBrush">
+      <brush brushstyle="SolidPattern">
+       <color alpha="255">
         <red>0</red>
         <green>0</green>
         <blue>0</blue>
        </color>
       </brush>
      </property>
-     <property name="renderHints" >
+     <property name="renderHints">
       <set>QPainter::Antialiasing|QPainter::HighQualityAntialiasing|QPainter::NonCosmeticDefaultPen|QPainter::SmoothPixmapTransform|QPainter::TextAntialiasing</set>
      </property>
-     <property name="resizeAnchor" >
+     <property name="resizeAnchor">
       <enum>QGraphicsView::AnchorViewCenter</enum>
      </property>
-     <property name="viewportUpdateMode" >
+     <property name="viewportUpdateMode">
       <enum>QGraphicsView::FullViewportUpdate</enum>
      </property>
-     <property name="rubberBandSelectionMode" >
+     <property name="rubberBandSelectionMode">
       <enum>Qt::IntersectsItemShape</enum>
      </property>
     </widget>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout" >
+    <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <spacer name="horizontalSpacer" >
-       <property name="orientation" >
+      <spacer name="horizontalSpacer">
+       <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
-       <property name="sizeHint" stdset="0" >
+       <property name="sizeHint" stdset="0">
         <size>
          <width>40</width>
          <height>20</height>
@@ -63,15 +67,15 @@
       </spacer>
      </item>
      <item>
-      <widget class="QLabel" name="m_pCurrentOpenDirectoryPathLabel" >
-       <property name="text" >
-        <string>I:\backup\My Stuff\Wallpapers\BMPS</string>
+      <widget class="QLabel" name="m_pCurrentOpenDirectoryPathLabel">
+       <property name="text">
+        <string>Select Image Diretory path</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QToolButton" name="m_pDirectorySelectionToolButton" >
-       <property name="text" >
+      <widget class="QToolButton" name="m_pDirectorySelectionToolButton">
+       <property name="text">
         <string>...</string>
        </property>
       </widget>
@@ -84,7 +88,7 @@
   <customwidget>
    <class>CMainPictureWallArea</class>
    <extends>QGraphicsView</extends>
-   <header location="global" >MainPictureWallArea.h</header>
+   <header location="global">MainPictureWallArea.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

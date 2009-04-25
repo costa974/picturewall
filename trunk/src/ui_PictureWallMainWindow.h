@@ -1,7 +1,7 @@
 /********************************************************************************
 ** Form generated from reading ui file 'PictureWallMainWindow.ui'
 **
-** Created: Thu Apr 23 23:07:52 2009
+** Created: Sat Apr 25 22:57:21 2009
 **      by: Qt User Interface Compiler version 4.4.3
 **
 ** WARNING! All changes made in this file will be lost when recompiling ui file!
@@ -46,6 +46,7 @@ public:
     m_pMainPictureWallArea->setObjectName(QString::fromUtf8("m_pMainPictureWallArea"));
     m_pMainPictureWallArea->setFrameShape(QFrame::NoFrame);
     m_pMainPictureWallArea->setFrameShadow(QFrame::Plain);
+    m_pMainPictureWallArea->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     QBrush brush(QColor(0, 0, 0, 255));
     brush.setStyle(Qt::SolidPattern);
     m_pMainPictureWallArea->setBackgroundBrush(brush);
@@ -84,7 +85,7 @@ public:
     void retranslateUi(QWidget *PictureWallMainWindowDesignerUI)
     {
     PictureWallMainWindowDesignerUI->setWindowTitle(QApplication::translate("PictureWallMainWindowDesignerUI", "Form", 0, QApplication::UnicodeUTF8));
-    m_pCurrentOpenDirectoryPathLabel->setText(QApplication::translate("PictureWallMainWindowDesignerUI", "I:\\backup\\My Stuff\\Wallpapers\\BMPS", 0, QApplication::UnicodeUTF8));
+    m_pCurrentOpenDirectoryPathLabel->setText(QApplication::translate("PictureWallMainWindowDesignerUI", "Select Image Diretory path", 0, QApplication::UnicodeUTF8));
     m_pDirectorySelectionToolButton->setText(QApplication::translate("PictureWallMainWindowDesignerUI", "...", 0, QApplication::UnicodeUTF8));
     Q_UNUSED(PictureWallMainWindowDesignerUI);
     } // retranslateUi

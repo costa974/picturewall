@@ -16,14 +16,12 @@ CONFIG += warn_on \
 
 # Input
 HEADERS += CustomLabel.h \
-           CustomProxy.h \
            ImageHolder.h \
            ImageProxyWidget.h \
            MainPictureWallArea.h \
            PictureWallMainWindow.h
 FORMS += ImageContainer.ui PictureWallMainWindow.ui
 SOURCES += CustomLabel.cpp \
-           CustomProxy.cpp \
            ImageHolder.cpp \
            ImageProxyWidget.cpp \
            main.cpp \

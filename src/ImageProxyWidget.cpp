@@ -22,69 +22,169 @@
 
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
+#include <QGraphicsSceneMouseEvent>
 #include <QPen>
+#include <QGraphicsScene>
+#include <QGraphicsView>
+#include <QScrollBar>
 
 #include <math.h>
 
 CImageProxyWidget::CImageProxyWidget( QGraphicsItem * parent, Qt::WindowFlags wFlags)
- : QGraphicsProxyWidget(parent,wFlags)
+ : QGraphicsProxyWidget(parent,wFlags),popupShown(false)
 {
-	setReflection(false);
-}
+    m_pTimeLineForImageZoomAnimation = new QTimeLine(500, this);
+    connect(m_pTimeLineForImageZoomAnimation, SIGNAL(frameChanged(int)),
+            this, SLOT(updateStep(int)));
+    connect(m_pTimeLineForImageZoomAnimation, SIGNAL(stateChanged(QTimeLine::State)),
+            this, SLOT(stateChanged(QTimeLine::State)));
+   connect(m_pTimeLineForImageZoomAnimation, SIGNAL(finished ()),
+            this, SLOT(animationFinished()));	
+	
+   m_pTimeLineForImageZoomAnimation->setFrameRange(13,90);
 
+
+	
+}
 
 CImageProxyWidget::~CImageProxyWidget()
 {
+
+	qDebug("Destructor  CImageProxyWidget");
+	delete m_pTimeLineForImageZoomAnimation;
+
 }
 
 
-void CImageProxyWidget::paint ( QPainter *pPainter, const QStyleOptionGraphicsItem *pStyleOptionGraphicsItem, QWidget *pWidget )
+QRectF CImageProxyWidget::boundingRect() const
 {
-	if(!this->reflection())
-	{
-		QPen pen;  // creates a default pen
-	
-		pen.setStyle(Qt::SolidLine);
-		pen.setWidth(6);
-		pen.setBrush(Qt::white);
-		pen.setCapStyle(Qt::RoundCap);
-		pen.setJoinStyle(Qt::RoundJoin);
-		
-		pPainter->setPen(pen);
-	
-		pPainter->drawRoundedRect(this->boundingRect().x(), this->boundingRect().y(), this->boundingRect().width(), this->boundingRect().height(), 0, 0);
-	}
+    return QGraphicsProxyWidget::boundingRect().adjusted(0, 0, 0, 0);
 
-	   const QBrush color(QColor(0, 0, 255,0),Qt::Dense4Pattern);
-   
-	QGraphicsProxyWidget::paint(pPainter,pStyleOptionGraphicsItem,pWidget);
 }
 
-void CImageProxyWidget::setReflection(const bool &reflectionFlag)
-{
-	relectionOn = reflectionFlag;
-}
 
-bool CImageProxyWidget::reflection()
-{
-	return relectionOn;
-}
-
-void CImageProxyWidget::paintWindowFrame(QPainter *painter, const QStyleOptionGraphicsItem *option,
-                                   QWidget *widget)
+void CImageProxyWidget::paintWindowFrame(QPainter *, const QStyleOptionGraphicsItem *,
+                                   QWidget *)
 {
 
-
-
-	    QGraphicsProxyWidget::paintWindowFrame(painter, option, widget);
 }
 
+void CImageProxyWidget::closeEvent ( QCloseEvent * event )
+{
+	event->ignore();
+}
 
 void CImageProxyWidget::mousePressEvent ( QGraphicsSceneMouseEvent *event )
 {
-	CustomLabel *c = (CustomLabel *)this->widget();
+  if(event->button() != Qt::LeftButton)	
+  {	
+	return;	
+  }
+    scene()->setActiveWindow(this);
+    if(!popupShown)	
+    {
+	if (m_pTimeLineForImageZoomAnimation->currentValue() != 1)
+		zoomIn();
+    }else
+    {
+	zoomOut();
+    }		
+}
 
-	c->setImagePath("I Am CLICKED");
+void CImageProxyWidget::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
+{
+    QGraphicsProxyWidget::hoverEnterEvent(event);
+}
 
-	QGraphicsProxyWidget::mousePressEvent(event);
+void CImageProxyWidget::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
+{
+    QGraphicsProxyWidget::hoverLeaveEvent(event);
+
+    if (popupShown && (m_pTimeLineForImageZoomAnimation->direction() != QTimeLine::Backward || m_pTimeLineForImageZoomAnimation->currentValue() != 0))
+        zoomOut();
+}
+
+
+void CImageProxyWidget::setDefaultItemGeometry(const QRectF &geometry)
+{
+		m_ItemGeometry = geometry;
+}
+
+
+void CImageProxyWidget::updateStep(int step)
+{
+    QRectF r = boundingRect();
+
+	qreal newWidth = this->scene()->views().at(0)->geometry().width() * step / 100; 
+	qreal newHeight = this->scene()->views().at(0)->geometry().height() * step / 100;
+
+	if(m_pTimeLineForImageZoomAnimation->direction() == QTimeLine::Backward)
+	{
+		if(this->scene()->views().at(0)->verticalScrollBar() != NULL)
+		{
+			this->scene()->views().at(0)->verticalScrollBar()->setValue(this->scene()->views().at(0)->verticalScrollBar()->value()+5);
+		}
+
+		this->setGeometry(QRectF(this->geometry().x() + 30.5,this->geometry().y()+ 10.5,newWidth,newHeight));
+		emit imageZoomedOut();
+	}else
+	{
+		this->setGeometry(QRectF(this->geometry().x() - 30.5,this->geometry().y()- 10.5,newWidth,newHeight));
+	}
+
+	this->scene()->setSceneRect(this->scene()->itemsBoundingRect());
+	this->scene()->views().at(0)->ensureVisible(this,0,0);
+}
+
+void CImageProxyWidget::stateChanged(QTimeLine::State state)
+{
+    if (state == QTimeLine::Running) {
+	if (m_pTimeLineForImageZoomAnimation->direction() == QTimeLine::Forward)
+	 setCacheMode(DeviceCoordinateCache);
+    } else if (state == QTimeLine::NotRunning) {
+	if (m_pTimeLineForImageZoomAnimation->direction() == QTimeLine::Backward)
+            setCacheMode(DeviceCoordinateCache);
+    }
+}
+
+void CImageProxyWidget::zoomIn()
+{
+
+popupShown =true;		
+    if (m_pTimeLineForImageZoomAnimation->direction() != QTimeLine::Forward)
+        m_pTimeLineForImageZoomAnimation->setDirection(QTimeLine::Forward);
+    if (m_pTimeLineForImageZoomAnimation->state() == QTimeLine::NotRunning) 
+        m_pTimeLineForImageZoomAnimation->start();
+
+}
+
+void CImageProxyWidget::zoomOut()
+{
+popupShown =false;
+    if (m_pTimeLineForImageZoomAnimation->direction() != QTimeLine::Backward)
+        m_pTimeLineForImageZoomAnimation->setDirection(QTimeLine::Backward);
+    if (m_pTimeLineForImageZoomAnimation->state() == QTimeLine::NotRunning) 
+        m_pTimeLineForImageZoomAnimation->start();
+
+}
+
+void CImageProxyWidget::animationFinished()
+{
+	if(m_pTimeLineForImageZoomAnimation->direction() == QTimeLine::Backward)
+	{
+		if(this->scene()->views().at(0)->verticalScrollBar() != NULL)
+		{
+			this->scene()->views().at(0)->verticalScrollBar()->setValue(this->scene()->views().at(0)->verticalScrollBar()->maximum());
+		}
+		emit imageZoomedOut();
+			this->setGeometry(m_ItemGeometry);
+	}
+
+	if(m_pTimeLineForImageZoomAnimation->direction() == QTimeLine::Forward)
+	{
+		this->scene()->setSceneRect(this->scene()->itemsBoundingRect());
+		this->scene()->views().at(0)->ensureVisible(this,0,0);
+		emit imageZoomedIn();
+	}
+
 }

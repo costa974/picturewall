@@ -38,37 +38,21 @@ Q_OBJECT
 public:
     CMainPictureWallArea(QWidget *parent = 0);
 
-    ~CMainPictureWallArea();
+    virtual ~CMainPictureWallArea();
 
-  enum EZoomLevel
-  {
-        ZoomLevel10 = 10,
-	ZoomLevel30 = 30,
-	ZoomLevel50 = 50,
-	ZoomLevel60 = 60,
-	ZoomLevel80 = 80,
-	ZoomLevel100 = 100,
-  };
-
-private:
-
-	enum EZoomFocus
-	{
-		IN,
-		OUT
-	};
-
+    enum EZoomFocus
+    {
+	IN,
+	OUT,
+	NORMAL
+    };
 
 public slots:
 
       void loadImagesFromDirectoryRecursivelySlot(QString directoryPath);
       void showImageOnWallAtPosition(int num);
-      void changeZoomLevelByFactor(int factor,EZoomFocus zoom);
+      void changeZoomLevelByFactor(EZoomFocus zoom);
 
-	// Scrolling animation slots 
-      void updateScrollingAnimationStep(int steps);
-      void scrollingAnimationStateChanged(QTimeLine::State);
-      void scrollingAnimationFinsihed();		
 
 protected:
 	virtual void wheelEvent ( QWheelEvent *  ); 
@@ -76,22 +60,19 @@ protected:
 	virtual void mouseReleaseEvent ( QMouseEvent * );
 	virtual void mouseMoveEvent ( QMouseEvent * );
 
-private:
 
-	void zoom(EZoomFocus zoom);
+private:
+	void setMessage(const QString &text);
+
 
 private:
 	QFutureWatcher<ScaledImageInfo> *m_pImageScaling; 
 	int m_Row;
 	int m_Column;
 	QGraphicsScene m_GraphicsScene;
-	EZoomLevel m_CurrentZoomLevel;
-
-	QTimeLine *m_pScrollingAnimation;
+	qreal m_ZoomFactor;
 	int m_MouseDeltaValueForPressedEvent;
 	bool m_MouseButtonPressed;
-	
-
 };
 
 #endif

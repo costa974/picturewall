@@ -21,7 +21,7 @@
 #define IMAGEPROXYWIDGET_H
 
 #include <QGraphicsProxyWidget>
-
+#include <QTimeLine>
 /**
 	@author vishwajeet <vishwajeet.dusane@gmail.com>
 */
@@ -31,20 +31,35 @@ Q_OBJECT
 public:
     CImageProxyWidget( QGraphicsItem * parent = 0, Qt::WindowFlags wFlags = 0);
 
-    ~CImageProxyWidget();
+    virtual ~CImageProxyWidget();
 
 	
-	void setReflection(const bool &reflectionFlag);
-	bool reflection();
+   QRectF boundingRect() const;
+
+    void setDefaultItemGeometry(const QRectF &geometry);	
 
 protected:
-  virtual void paint ( QPainter *, const QStyleOptionGraphicsItem *, QWidget * );
-  virtual void paintWindowFrame(QPainter *painter, const QStyleOptionGraphicsItem *option,QWidget *widget);              
+    void paintWindowFrame(QPainter *painter, const QStyleOptionGraphicsItem *option,QWidget *widget);                          
+    void hoverEnterEvent(QGraphicsSceneHoverEvent *event);
+    void hoverLeaveEvent(QGraphicsSceneHoverEvent *event);
+    void mousePressEvent ( QGraphicsSceneMouseEvent *event );	
+    void closeEvent ( QCloseEvent * event ); 
 
-  virtual void mousePressEvent ( QGraphicsSceneMouseEvent *event );	
+private slots:
+    void updateStep(int step);
+    void stateChanged(QTimeLine::State);
+    void zoomIn();
+    void zoomOut();
+    void animationFinished();
+
+signals:
+    void imageZoomedIn();
+    void imageZoomedOut();
 
 private:
-	bool relectionOn;
+    QTimeLine *m_pTimeLineForImageZoomAnimation;
+    bool popupShown;
+    QRectF m_ItemGeometry;
 
 };
 

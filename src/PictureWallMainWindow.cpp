@@ -27,14 +27,32 @@ CPictureWallMainWindow::CPictureWallMainWindow(QWidget *parent)
 {
 	setupUi(this);
 
+	m_pImageToSearchOnGoogle->setVisible(false);
+
+	m_pGoogleSearcherInstance = new CGoogleSearcher(this);
+
 	connect(m_pDirectorySelectionToolButton,SIGNAL(pressed()),this,SLOT(changeDirectorySlot()));
         connect(this,SIGNAL(directoryChangedSignal(QString)),m_pMainPictureWallArea,SLOT(loadImagesFromDirectoryRecursivelySlot(QString)));
+
+	connect(m_pGoogleImageSearchOption,SIGNAL(toggled ( bool )),this,SLOT(selectGoogleSearchOption(bool)));
+	connect(m_pLocalImageViewerOption,SIGNAL(toggled ( bool )),this,SLOT(selectLocalImageViewerSelected(bool)));
+
+	connect(m_pImageToSearchOnGoogle,SIGNAL(returnPressed ()),this,SLOT(startNewGoogleSearch()));
+
+	connect(this,SIGNAL(googleSearchResult(QHash<QString,QString>)),m_pMainPictureWallArea,SLOT(showGoogleImageResult(QHash<QString,QString>)));
+
+
+
+
 }
 
 
 CPictureWallMainWindow::~CPictureWallMainWindow()
 {
-	qDebug("Destructor  CPictureWallMainWindow");
+	if(m_pGoogleSearcherInstance != NULL)
+	{	
+		delete m_pGoogleSearcherInstance;
+	}
 }
 
 void CPictureWallMainWindow::changeDirectorySlot()
@@ -50,7 +68,49 @@ void CPictureWallMainWindow::changeDirectorySlot()
 		emit directoryChangedSignal(dir);
 	}
 	
+	delete m_pGoogleSearcherInstance;
+	m_pGoogleSearcherInstance =0;
+}
+
+void CPictureWallMainWindow::selectGoogleSearchOption(bool checked )
+{
+	if(checked)
+	{
+		m_pImageToSearchOnGoogle->setVisible(true);
+		m_pCurrentOpenDirectoryPathLabel->setVisible(false);
+		m_pDirectorySelectionToolButton->setVisible(false);
+		emit googleSearchOptionSelected();
+	}
 
 }
+
+void CPictureWallMainWindow::selectLocalImageViewerSelected(bool checked )
+{
+	if(checked)
+	{
+		m_pImageToSearchOnGoogle->setVisible(false);
+		m_pCurrentOpenDirectoryPathLabel->setVisible(true);
+		m_pDirectorySelectionToolButton->setVisible(true);
+		emit localImageViewerSelected();
+	}
+
+
+}
+
+void CPictureWallMainWindow::startNewGoogleSearch()
+{
+	if(m_pGoogleSearcherInstance != NULL)
+	{	
+		delete m_pGoogleSearcherInstance;
+	}
+
+	m_pGoogleSearcherInstance = new CGoogleSearcher(this);
+	connect(m_pGoogleSearcherInstance,SIGNAL(parsedResult(QHash<QString,QString>)),this,SIGNAL(googleSearchResult(QHash<QString,QString>)));
+
+	m_pGoogleSearcherInstance->setSearchString(m_pImageToSearchOnGoogle->text());
+	m_pGoogleSearcherInstance->search(m_pImageToSearchOnGoogle->text());
+	m_pMainPictureWallArea->cleanAllResults();
+}
+
 
 

@@ -54,6 +54,23 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
+      <widget class="QRadioButton" name="m_pGoogleImageSearchOption">
+       <property name="text">
+        <string>Google </string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QRadioButton" name="m_pLocalImageViewerOption">
+       <property name="text">
+        <string>Local</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -77,6 +94,13 @@
       <widget class="QToolButton" name="m_pDirectorySelectionToolButton">
        <property name="text">
         <string>...</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="m_pImageToSearchOnGoogle">
+       <property name="focusPolicy">
+        <enum>Qt::ClickFocus</enum>
        </property>
       </widget>
      </item>

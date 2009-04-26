@@ -20,20 +20,32 @@
 #include "ImageHolder.h"
 #include <QFileInfo>
 
+
+
 CImageHolder::CImageHolder(QWidget *parent)
  : QWidget(parent)
 {
 	setupUi(this);
+	
+	m_pImageDownloadProgressBar->hide();
+	
+	m_pImageLoader = new CHttpImageDownloader(QString(),QString(),this);
+	
+	connect(m_pImageLoader,SIGNAL(downloadComplete(QByteArray,QString)),this,SLOT(imageDownloaded(QByteArray)));
+	connect(m_pImageLoader,SIGNAL(downloading(int )),this,SLOT(imageDownloadProgress(int)));
+	
 }
 
 
 CImageHolder::~CImageHolder()
 {
-	qDebug("Destructor  CImageHolder");
+	delete m_pImageLoader;
 }
 
 void CImageHolder::setPixmap(const QPixmap &imageItem)
 {
+	m_pImageDownloadProgressBar->hide();
+	m_pImageLoader->quit();
 	m_pImagePlaceHolder->setPixmap(imageItem);
 }
 
@@ -50,8 +62,36 @@ QPixmap CImageHolder::pixmap() const
 
 void CImageHolder::setOriginalPixmap()
 {
-	QImage image(m_ImagePath);
-	m_pImagePlaceHolder->setPixmap(QPixmap::fromImage(image.scaled ( QSize ( this->width(), this->height()), Qt::KeepAspectRatio, Qt::SmoothTransformation )));
-
+	if(m_ImagePath.startsWith("http"))
+	{
+		m_pImageDownloadProgressBar->show();
+		m_pImageLoader->setDownloadImageUrl(m_ImagePath);
+		m_pImageLoader->start();		
+	}else
+	{
+		QImage image(m_ImagePath);
+		m_pImagePlaceHolder->setPixmap(QPixmap::fromImage(image.scaled ( QSize ( this->width(), this->height()), Qt::KeepAspectRatio, Qt::SmoothTransformation )));
+	}
 }
+
+void CImageHolder::imageDownloaded(QByteArray imageData)
+{
+	
+	QImage image(QImage::fromData(imageData));
+	m_pImageDownloadProgressBar->hide();	
+	if(image.isNull())
+	{
+		m_pImagePlaceHolder->setText("Image Is Not Available On Server");
+	}else
+	{
+	m_pImagePlaceHolder->setPixmap(QPixmap::fromImage(image.scaled ( QSize ( this->width(), this->height()), Qt::KeepAspectRatio, Qt::SmoothTransformation )));
+	}
+	
+}
+
+void CImageHolder::imageDownloadProgress(int progress)
+{
+	m_pImageDownloadProgressBar->setValue(progress);
+}
+		
 

@@ -49,8 +49,6 @@ CImageProxyWidget::CImageProxyWidget( QGraphicsItem * parent, Qt::WindowFlags wF
 
 CImageProxyWidget::~CImageProxyWidget()
 {
-
-	qDebug("Destructor  CImageProxyWidget");
 	delete m_pTimeLineForImageZoomAnimation;
 
 }

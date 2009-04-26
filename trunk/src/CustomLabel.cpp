@@ -31,7 +31,6 @@ CustomLabel::CustomLabel(QWidget *parent)
     QHBoxLayout *horizontalLayout = new QHBoxLayout(this);
     
     m_pImageHolderInstance = new CImageHolder(this);
-    
 	horizontalLayout->setMargin(0);	
      horizontalLayout->addWidget(m_pImageHolderInstance);
 
@@ -40,7 +39,6 @@ CustomLabel::CustomLabel(QWidget *parent)
 
 CustomLabel::~CustomLabel()
 {
-	qDebug("Destructor  CustomLabel");
 	delete m_pImageHolderInstance;
 }
 

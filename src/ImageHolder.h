@@ -22,6 +22,7 @@
 
 #include <QWidget>
 #include "ui_ImageContainer.h"
+#include "HttpImageDownloader.h"
 
 /**
 	@author vishwajeet <vishwajeet.dusane@gmail.com>
@@ -40,8 +41,14 @@ public:
 
     void setImagePath(const QString& path);
 
+public slots:
+    void imageDownloaded(QByteArray);
+    void imageDownloadProgress(int);		
+
 private:
     QString m_ImagePath;
+    CHttpImageDownloader *m_pImageLoader;	
+	
 };
 
 #endif

@@ -22,6 +22,7 @@
 
 #include <QDialog>
 #include <QLabel>
+#include <QWebView>
 
 #include "ImageHolder.h"
 

@@ -24,6 +24,12 @@
 #include "CustomLabel.h"
 #include "ImageProxyWidget.h"
 
+#include "HttpImageDownloader.h"
+
+#include <QWebView>
+#include <QUrl>
+#include <QFileInfo>
+
 // Global Variable
 int mainWidth = 0;
 int mainHeight = 0;
@@ -32,7 +38,9 @@ int ImageWidth = 0;
 int ImageHeight = 0;
 
 
+
 // Global Functions
+
 ScaledImageInfo MyScale(const QString &imageFileName )
 {
 	ImageWidth = (int)(mainWidth * 15 )/ 100;
@@ -45,6 +53,15 @@ ScaledImageInfo MyScale(const QString &imageFileName )
 	return result;
 }
 
+
+QImage scaleFromImage(const QImage &image)
+{
+	ImageWidth = (int)(mainWidth * 15 )/ 100;
+	ImageHeight = (int)(mainHeight * 15) /100;
+	
+	QImage scaledImage = image.scaled ( QSize ( ImageWidth, ImageHeight), Qt::KeepAspectRatio, Qt::SmoothTransformation );
+	return scaledImage;
+}
 
 static QImage *mirrorImage (const QImage *image) {
 	QImage *tmpImage = new QImage(image->mirrored(false, true));
@@ -88,29 +105,22 @@ CMainPictureWallArea::CMainPictureWallArea(QWidget *parent)
 	
 	setMessage("Please Set Image Directory");
 
-	connect ( m_pImageScaling, SIGNAL ( resultReadyAt ( int ) ), SLOT ( showImageOnWallAtPosition ( int ) ) );
+
+
+	connect ( m_pImageScaling, SIGNAL ( resultReadyAt ( int ) ), SLOT ( showImageOnWall ( int ) ) );
 }
 
 
 CMainPictureWallArea::~CMainPictureWallArea()
 {
 
-	qDebug("Destructor  CMainPictureWallArea");
+	
 
 	delete m_pImageScaling;
 }
 
-void CMainPictureWallArea::loadImagesFromDirectoryRecursivelySlot(QString directoryPath)
+void CMainPictureWallArea::cleanAllResults()
 {
-	QDir dir(directoryPath);	
-	QStringList filter;
-	QStringList fileList;
-
-	filter << "*.jpg" << "*.png" << "*.bmp" << "*.gif" << "*.jpeg" << "*.pbm" << "*.xmp" << "*.xbm";
-
-	mainWidth = this->geometry().width();
-	mainHeight = this->geometry().height();
-
 	m_pImageScaling->cancel();
 	m_pImageScaling->waitForFinished ();
 	m_GraphicsScene.clear();
@@ -123,7 +133,20 @@ void CMainPictureWallArea::loadImagesFromDirectoryRecursivelySlot(QString direct
 	
 	m_Row =0;
 	m_Column=0;
-	
+} 
+
+void CMainPictureWallArea::loadImagesFromDirectoryRecursivelySlot(QString directoryPath)
+{
+	QDir dir(directoryPath);	
+	QStringList filter;
+	QStringList fileList;
+
+	filter << "*.jpg" << "*.png" << "*.bmp" << "*.gif" << "*.jpeg" << "*.pbm" << "*.xmp" << "*.xbm";
+
+	cleanAllResults();
+	mainWidth = this->geometry().width();
+	mainHeight = this->geometry().height();
+		
 	
 	fileList = dir.entryList ( filter, QDir::Files );
 
@@ -142,7 +165,8 @@ void CMainPictureWallArea::loadImagesFromDirectoryRecursivelySlot(QString direct
 	m_pImageScaling->setFuture(QtConcurrent::mapped(fileList,MyScale));
 }
 
-void CMainPictureWallArea::showImageOnWallAtPosition(int num)
+
+void CMainPictureWallArea::showImageOnWall(int num)
 {
 
 	CImageProxyWidget *pCImageProxyWidgetInstance = new CImageProxyWidget(0, Qt::Window );
@@ -184,6 +208,67 @@ void CMainPictureWallArea::showImageOnWallAtPosition(int num)
 		QGraphicsProxyWidget *pCImageProxyWidgetReflectionInstance = new QGraphicsProxyWidget(0, Qt::Window );
 	
 		QImage *img = new QImage(result.m_ScaledImage);
+	
+		img = mirrorImage(img);
+
+		imageReflcetionItem->setPixmap(QPixmap::fromImage(*img));
+	
+
+		QRectF rect = pCImageProxyWidgetReflectionInstance->boundingRect();
+		rect.setWidth(ImageWidth+10);
+		rect.setHeight(ImageHeight+10);
+	
+		pCImageProxyWidgetReflectionInstance->setWidget(imageReflcetionItem);
+		pCImageProxyWidgetReflectionInstance->setPos(m_Column * rect.width() * 1.05, (m_Row) * rect.height() * 1.3 );
+		pCImageProxyWidgetReflectionInstance->setCacheMode ( QGraphicsItem::ItemCoordinateCache);
+		
+		m_GraphicsScene.addItem ( pCImageProxyWidgetReflectionInstance );
+	}
+
+}
+
+void  CMainPictureWallArea::showImageOnWall(QByteArray image,QString imageMainUrl)
+{
+	CImageProxyWidget *pCImageProxyWidgetInstance = new CImageProxyWidget(0, Qt::Window );
+	CustomLabel *imageItem = new CustomLabel();
+
+	//ScaledImageInfo result = m_pImageScaling->resultAt ( num );
+
+	imageItem->setPixmap(QPixmap::fromImage(scaleFromImage(QImage::fromData(image))));
+	imageItem->setImagePath(imageMainUrl);
+	//imageItem->setImagePath(result.m_ScaledImagePath);
+
+	if(m_Row >= 3)
+	{
+		m_Row =0;
+		m_Column ++;
+				
+	}
+
+	QRectF rect = pCImageProxyWidgetInstance->boundingRect();
+	rect.setWidth(ImageWidth+10);
+	rect.setHeight(ImageHeight+10);
+
+	pCImageProxyWidgetInstance->setWidget(imageItem);
+	pCImageProxyWidgetInstance->setPos(m_Column * rect.width() * 1.05, m_Row * rect.height() * 1.3 );
+	pCImageProxyWidgetInstance->setCacheMode ( QGraphicsItem::NoCache );
+	pCImageProxyWidgetInstance->setDefaultItemGeometry(pCImageProxyWidgetInstance->geometry());
+	m_GraphicsScene.addItem ( pCImageProxyWidgetInstance );
+	
+	m_GraphicsScene.setSceneRect ( m_GraphicsScene.itemsBoundingRect() );
+
+	QObject::connect(pCImageProxyWidgetInstance,SIGNAL(imageZoomedIn()),imageItem,SLOT(imageZoomedIn()));
+	QObject::connect(pCImageProxyWidgetInstance,SIGNAL(imageZoomedOut()),imageItem,SLOT(imageZoomedOut()));
+
+	m_Row ++;
+
+	if(m_Row == 3)
+	{
+		
+		QLabel *imageReflcetionItem = new QLabel();
+		QGraphicsProxyWidget *pCImageProxyWidgetReflectionInstance = new QGraphicsProxyWidget(0, Qt::Window );
+	
+		QImage *img = new QImage(scaleFromImage(QImage::fromData(image)));
 	
 		img = mirrorImage(img);
 
@@ -300,6 +385,19 @@ void CMainPictureWallArea::mouseMoveEvent ( QMouseEvent *e )
 	}
 
 	QGraphicsView::mouseMoveEvent(e);
+}
+
+void CMainPictureWallArea::showGoogleImageResult(QHash<QString,QString> result)
+{
+	mainWidth = this->geometry().width();
+	mainHeight = this->geometry().height();
+
+	CHttpImageDownloader *pDownloadImageFromGoogle = new CHttpImageDownloader(result["tbUrl"],result["url"]);
+
+	connect(pDownloadImageFromGoogle,SIGNAL(downloadComplete(QByteArray,QString)),pDownloadImageFromGoogle,SLOT(deleteLater()));
+	connect(pDownloadImageFromGoogle,SIGNAL(downloadComplete(QByteArray,QString)),this,SLOT(showImageOnWall(QByteArray,QString )));
+	
+	pDownloadImageFromGoogle->start();
 }
 
 

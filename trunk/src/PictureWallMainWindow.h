@@ -22,7 +22,7 @@
 
 #include <QWidget>
 #include "ui_PictureWallMainWindow.h"
-
+#include "GoogleSearcher.h"
 
 
 /**
@@ -38,9 +38,19 @@ public:
     virtual ~CPictureWallMainWindow();
 public slots:
      void changeDirectorySlot();
+     void startNewGoogleSearch();	
+     void selectGoogleSearchOption(bool checked );
+     void selectLocalImageViewerSelected(bool checked ); 	
 
 signals:
      void directoryChangedSignal(QString directoryPath);
+     void googleSearchOptionSelected();
+     void localImageViewerSelected();
+     void googleSearchResult(QHash<QString,QString>);	
+
+private:
+     CGoogleSearcher *m_pGoogleSearcherInstance;
+	
 };
 
 #endif

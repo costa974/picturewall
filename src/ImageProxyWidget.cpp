@@ -89,10 +89,6 @@ void CImageProxyWidget::mousePressEvent ( QGraphicsSceneMouseEvent *event )
     }		
 }
 
-void CImageProxyWidget::hoverEnterEvent(QGraphicsSceneHoverEvent *event)
-{
-    QGraphicsProxyWidget::hoverEnterEvent(event);
-}
 
 void CImageProxyWidget::hoverLeaveEvent(QGraphicsSceneHoverEvent *event)
 {

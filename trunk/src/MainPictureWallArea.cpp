@@ -43,361 +43,364 @@ int ImageHeight = 0;
 
 ScaledImageInfo MyScale(const QString &imageFileName )
 {
-	ImageWidth = (int)(mainWidth * 15 )/ 100;
-	ImageHeight = (int)(mainHeight * 15) /100;
+    ImageWidth = (int)(mainWidth * 15 )/ 100;
+    ImageHeight = (int)(mainHeight * 15) /100;
 
-	ScaledImageInfo result;
-	QImage image ( imageFileName );
-	result.m_ScaledImage = image.scaled ( QSize ( ImageWidth, ImageHeight), Qt::KeepAspectRatio, Qt::SmoothTransformation );
-	result.m_ScaledImagePath = imageFileName;
-	return result;
+    ScaledImageInfo result;
+    QImage image ( imageFileName );
+    result.m_ScaledImage = image.scaled ( QSize ( ImageWidth, ImageHeight), Qt::KeepAspectRatio, Qt::SmoothTransformation );
+    result.m_ScaledImagePath = imageFileName;
+    return result;
 }
 
 
 QImage scaleFromImage(const QImage &image)
 {
-	ImageWidth = (int)(mainWidth * 15 )/ 100;
-	ImageHeight = (int)(mainHeight * 15) /100;
-	
-	QImage scaledImage = image.scaled ( QSize ( ImageWidth, ImageHeight), Qt::KeepAspectRatio, Qt::SmoothTransformation );
-	return scaledImage;
+    ImageWidth = (int)(mainWidth * 15 )/ 100;
+    ImageHeight = (int)(mainHeight * 15) /100;
+
+    QImage scaledImage = image.scaled ( QSize ( ImageWidth, ImageHeight), Qt::KeepAspectRatio, Qt::SmoothTransformation );
+    return scaledImage;
 }
 
-static QImage *mirrorImage (const QImage *image) {
-	QImage *tmpImage = new QImage(image->mirrored(false, true));
+static QImage *mirrorImage (const QImage *image)
+{
+    QImage *tmpImage = new QImage(image->mirrored(false, true));
 
-	QPoint p1, p2;
-	p2.setY(tmpImage->height());
-	
-	QLinearGradient gradient(p1, p2);
-	gradient.setColorAt(0, Qt::transparent);
-	gradient.setColorAt(1, QColor(0, 0, 0, 255));
+    QPoint p1, p2;
+    p2.setY(tmpImage->height());
 
-	QPainter p(tmpImage);
-	p.fillRect(0, 0, tmpImage->width(), tmpImage->height(), gradient);
+    QLinearGradient gradient(p1, p2);
+    gradient.setColorAt(0, Qt::transparent);
+    gradient.setColorAt(1, QColor(0, 0, 0, 255));
 
-	gradient.setColorAt(0,QColor(0, 0, 0, 255));
-	gradient.setColorAt(1, Qt::transparent);
-	p.fillRect(0,0, tmpImage->width(), tmpImage->height(), gradient);
+    QPainter p(tmpImage);
+    p.fillRect(0, 0, tmpImage->width(), tmpImage->height(), gradient);
 
-	p.end();
+    gradient.setColorAt(0,QColor(0, 0, 0, 255));
+    gradient.setColorAt(1, Qt::transparent);
+    p.fillRect(0,0, tmpImage->width(), tmpImage->height(), gradient);
 
-	return(tmpImage);
+    p.end();
+
+    return(tmpImage);
 }
 
 
 
 CMainPictureWallArea::CMainPictureWallArea(QWidget *parent)
- : QGraphicsView(parent),m_Row(0),m_Column(0)
+        : QGraphicsView(parent),m_Row(0),m_Column(0)
 {
 
-	m_pImageScaling = new QFutureWatcher<ScaledImageInfo> ( this );
+    m_pImageScaling = new QFutureWatcher<ScaledImageInfo> ( this );
 
-	m_ZoomFactor = 1;
-	m_MouseButtonPressed = false;
+    m_ZoomFactor = 1;
+    m_MouseButtonPressed = false;
 
-	this->setScene ( &m_GraphicsScene );
+    this->setScene ( &m_GraphicsScene );
 
-	this->setRenderHints ( QPainter::Antialiasing | QPainter::SmoothPixmapTransform | QPainter::HighQualityAntialiasing | QPainter::TextAntialiasing);
+    this->setRenderHints ( QPainter::Antialiasing | QPainter::SmoothPixmapTransform | QPainter::HighQualityAntialiasing | QPainter::TextAntialiasing);
 
-	this->setCacheMode ( QGraphicsView::CacheNone );
-	this->setViewportUpdateMode ( QGraphicsView::FullViewportUpdate );
-	
-	setMessage("Please Set Image Directory");
+    this->setCacheMode ( QGraphicsView::CacheNone );
+    this->setViewportUpdateMode ( QGraphicsView::FullViewportUpdate );
+
+    setMessage("Please Set Image Directory");
 
 
 
-	connect ( m_pImageScaling, SIGNAL ( resultReadyAt ( int ) ), SLOT ( showImageOnWall ( int ) ) );
+    connect ( m_pImageScaling, SIGNAL ( resultReadyAt ( int ) ), SLOT ( showImageOnWall ( int ) ) );
 }
 
 
 CMainPictureWallArea::~CMainPictureWallArea()
 {
 
-	
 
-	delete m_pImageScaling;
+
+    delete m_pImageScaling;
 }
 
 void CMainPictureWallArea::cleanAllResults()
 {
-	m_pImageScaling->cancel();
-	m_pImageScaling->waitForFinished ();
-	m_GraphicsScene.clear();
-	if(this->horizontalScrollBar() != NULL)
-	{
-		this->horizontalScrollBar()->setValue(this->horizontalScrollBar()->minimum());
-	}
+    m_pImageScaling->cancel();
+    m_pImageScaling->waitForFinished ();
+    m_GraphicsScene.clear();
+    if (this->horizontalScrollBar() != NULL)
+    {
+        this->horizontalScrollBar()->setValue(this->horizontalScrollBar()->minimum());
+    }
 
-	m_GraphicsScene.setSceneRect(QRectF(0,0,0,0));
-	
-	m_Row =0;
-	m_Column=0;
-} 
+    m_GraphicsScene.setSceneRect(QRectF(0,0,0,0));
+
+    m_Row =0;
+    m_Column=0;
+}
 
 void CMainPictureWallArea::loadImagesFromDirectoryRecursivelySlot(QString directoryPath)
 {
-	QDir dir(directoryPath);	
-	QStringList filter;
-	QStringList fileList;
+    QDir dir(directoryPath);
+    QStringList filter;
+    QStringList fileList;
 
-	filter << "*.jpg" << "*.png" << "*.bmp" << "*.gif" << "*.jpeg" << "*.pbm" << "*.xmp" << "*.xbm";
+    filter << "*.jpg" << "*.png" << "*.bmp" << "*.gif" << "*.jpeg" << "*.pbm" << "*.xmp" << "*.xbm";
 
-	cleanAllResults();
-	mainWidth = this->geometry().width();
-	mainHeight = this->geometry().height();
-		
-	
-	fileList = dir.entryList ( filter, QDir::Files );
-
-	for(int i=0;i<fileList.count();++i)
-	{
-		fileList[i] = dir.path()+QString("/")+fileList.at(i);		
-	}
+    cleanAllResults();
+    mainWidth = this->geometry().width();
+    mainHeight = this->geometry().height();
 
 
-	if(fileList.isEmpty())
-	{
-		setMessage("0 Images Found");
-		return;
-	}
+    fileList = dir.entryList ( filter, QDir::Files );
 
-	m_pImageScaling->setFuture(QtConcurrent::mapped(fileList,MyScale));
+    for (int i=0;i<fileList.count();++i)
+    {
+        fileList[i] = dir.path()+QString("/")+fileList.at(i);
+    }
+
+
+    if (fileList.isEmpty())
+    {
+        setMessage("0 Images Found");
+        return;
+    }
+
+    m_pImageScaling->setFuture(QtConcurrent::mapped(fileList,MyScale));
 }
 
 
 void CMainPictureWallArea::showImageOnWall(int num)
 {
 
-	CImageProxyWidget *pCImageProxyWidgetInstance = new CImageProxyWidget(0, Qt::Window );
-	CustomLabel *imageItem = new CustomLabel();
+    CImageProxyWidget *pCImageProxyWidgetInstance = new CImageProxyWidget(0, Qt::Window );
+    CustomLabel *imageItem = new CustomLabel();
 
-	ScaledImageInfo result = m_pImageScaling->resultAt ( num );
+    ScaledImageInfo result = m_pImageScaling->resultAt ( num );
 
-	imageItem->setPixmap(QPixmap::fromImage(result.m_ScaledImage));
-	imageItem->setImagePath(result.m_ScaledImagePath);
+    imageItem->setPixmap(QPixmap::fromImage(result.m_ScaledImage));
+    imageItem->setImagePath(result.m_ScaledImagePath);
 
-	if(m_Row >= 3)
-	{
-		m_Row =0;
-		m_Column ++;
-				
-	}
+    if (m_Row >= 3)
+    {
+        m_Row =0;
+        m_Column ++;
 
-	QRectF rect = pCImageProxyWidgetInstance->boundingRect();
-	rect.setWidth(ImageWidth+10);
-	rect.setHeight(ImageHeight+10);
+    }
 
-	pCImageProxyWidgetInstance->setWidget(imageItem);
-	pCImageProxyWidgetInstance->setPos(m_Column * rect.width() * 1.05, m_Row * rect.height() * 1.3 );
-	pCImageProxyWidgetInstance->setCacheMode ( QGraphicsItem::NoCache );
-	pCImageProxyWidgetInstance->setDefaultItemGeometry(pCImageProxyWidgetInstance->geometry());
-	m_GraphicsScene.addItem ( pCImageProxyWidgetInstance );
-	
-	m_GraphicsScene.setSceneRect ( m_GraphicsScene.itemsBoundingRect() );
+    QRectF rect = pCImageProxyWidgetInstance->boundingRect();
+    rect.setWidth(ImageWidth+10);
+    rect.setHeight(ImageHeight+10);
 
-	QObject::connect(pCImageProxyWidgetInstance,SIGNAL(imageZoomedIn()),imageItem,SLOT(imageZoomedIn()));
-	QObject::connect(pCImageProxyWidgetInstance,SIGNAL(imageZoomedOut()),imageItem,SLOT(imageZoomedOut()));
+    pCImageProxyWidgetInstance->setWidget(imageItem);
+    pCImageProxyWidgetInstance->setPos(m_Column * rect.width() * 1.05, m_Row * rect.height() * 1.3 );
+    pCImageProxyWidgetInstance->setCacheMode ( QGraphicsItem::NoCache );
+    pCImageProxyWidgetInstance->setDefaultItemGeometry(pCImageProxyWidgetInstance->geometry());
+    m_GraphicsScene.addItem ( pCImageProxyWidgetInstance );
 
-	m_Row ++;
+    m_GraphicsScene.setSceneRect ( m_GraphicsScene.itemsBoundingRect() );
 
-	if(m_Row == 3)
-	{
-		
-		QLabel *imageReflcetionItem = new QLabel();
-		QGraphicsProxyWidget *pCImageProxyWidgetReflectionInstance = new QGraphicsProxyWidget(0, Qt::Window );
-	
-		QImage *img = new QImage(result.m_ScaledImage);
-	
-		img = mirrorImage(img);
+    QObject::connect(pCImageProxyWidgetInstance,SIGNAL(imageZoomedIn()),imageItem,SLOT(imageZoomedIn()));
+    QObject::connect(pCImageProxyWidgetInstance,SIGNAL(imageZoomedOut()),imageItem,SLOT(imageZoomedOut()));
 
-		imageReflcetionItem->setPixmap(QPixmap::fromImage(*img));
-	
+    m_Row ++;
 
-		QRectF rect = pCImageProxyWidgetReflectionInstance->boundingRect();
-		rect.setWidth(ImageWidth+10);
-		rect.setHeight(ImageHeight+10);
-	
-		pCImageProxyWidgetReflectionInstance->setWidget(imageReflcetionItem);
-		pCImageProxyWidgetReflectionInstance->setPos(m_Column * rect.width() * 1.05, (m_Row) * rect.height() * 1.3 );
-		pCImageProxyWidgetReflectionInstance->setCacheMode ( QGraphicsItem::ItemCoordinateCache);
-		
-		m_GraphicsScene.addItem ( pCImageProxyWidgetReflectionInstance );
-	}
+    if (m_Row == 3)
+    {
+
+        QLabel *imageReflcetionItem = new QLabel();
+        QGraphicsProxyWidget *pCImageProxyWidgetReflectionInstance = new QGraphicsProxyWidget(0, Qt::Window );
+
+        QImage *img = new QImage(result.m_ScaledImage);
+
+        img = mirrorImage(img);
+
+        imageReflcetionItem->setPixmap(QPixmap::fromImage(*img));
+
+
+        QRectF rect = pCImageProxyWidgetReflectionInstance->boundingRect();
+        rect.setWidth(ImageWidth+10);
+        rect.setHeight(ImageHeight+10);
+
+        pCImageProxyWidgetReflectionInstance->setWidget(imageReflcetionItem);
+        pCImageProxyWidgetReflectionInstance->setPos(m_Column * rect.width() * 1.05, (m_Row) * rect.height() * 1.3 );
+        pCImageProxyWidgetReflectionInstance->setCacheMode ( QGraphicsItem::ItemCoordinateCache);
+
+        m_GraphicsScene.addItem ( pCImageProxyWidgetReflectionInstance );
+    }
 
 }
 
 void  CMainPictureWallArea::showImageOnWall(QByteArray image,QString imageMainUrl)
 {
-	CImageProxyWidget *pCImageProxyWidgetInstance = new CImageProxyWidget(0, Qt::Window );
-	CustomLabel *imageItem = new CustomLabel();
+    CImageProxyWidget *pCImageProxyWidgetInstance = new CImageProxyWidget(0, Qt::Window );
+    CustomLabel *imageItem = new CustomLabel();
 
-	//ScaledImageInfo result = m_pImageScaling->resultAt ( num );
+    //ScaledImageInfo result = m_pImageScaling->resultAt ( num );
 
-	imageItem->setPixmap(QPixmap::fromImage(scaleFromImage(QImage::fromData(image))));
-	imageItem->setImagePath(imageMainUrl);
-	//imageItem->setImagePath(result.m_ScaledImagePath);
+    imageItem->setPixmap(QPixmap::fromImage(scaleFromImage(QImage::fromData(image))));
+    imageItem->setImagePath(imageMainUrl);
+    //imageItem->setImagePath(result.m_ScaledImagePath);
 
-	if(m_Row >= 3)
-	{
-		m_Row =0;
-		m_Column ++;
-				
-	}
+    if (m_Row >= 3)
+    {
+        m_Row =0;
+        m_Column ++;
 
-	QRectF rect = pCImageProxyWidgetInstance->boundingRect();
-	rect.setWidth(ImageWidth+10);
-	rect.setHeight(ImageHeight+10);
+    }
 
-	pCImageProxyWidgetInstance->setWidget(imageItem);
-	pCImageProxyWidgetInstance->setPos(m_Column * rect.width() * 1.05, m_Row * rect.height() * 1.3 );
-	pCImageProxyWidgetInstance->setCacheMode ( QGraphicsItem::NoCache );
-	pCImageProxyWidgetInstance->setDefaultItemGeometry(pCImageProxyWidgetInstance->geometry());
-	m_GraphicsScene.addItem ( pCImageProxyWidgetInstance );
-	
-	m_GraphicsScene.setSceneRect ( m_GraphicsScene.itemsBoundingRect() );
+    QRectF rect = pCImageProxyWidgetInstance->boundingRect();
+    rect.setWidth(ImageWidth+10);
+    rect.setHeight(ImageHeight+10);
 
-	QObject::connect(pCImageProxyWidgetInstance,SIGNAL(imageZoomedIn()),imageItem,SLOT(imageZoomedIn()));
-	QObject::connect(pCImageProxyWidgetInstance,SIGNAL(imageZoomedOut()),imageItem,SLOT(imageZoomedOut()));
+    pCImageProxyWidgetInstance->setWidget(imageItem);
+    pCImageProxyWidgetInstance->setPos(m_Column * rect.width() * 1.05, m_Row * rect.height() * 1.3 );
+    pCImageProxyWidgetInstance->setCacheMode ( QGraphicsItem::NoCache );
+    pCImageProxyWidgetInstance->setDefaultItemGeometry(pCImageProxyWidgetInstance->geometry());
+    m_GraphicsScene.addItem ( pCImageProxyWidgetInstance );
 
-	m_Row ++;
+    m_GraphicsScene.setSceneRect ( m_GraphicsScene.itemsBoundingRect() );
 
-	if(m_Row == 3)
-	{
-		
-		QLabel *imageReflcetionItem = new QLabel();
-		QGraphicsProxyWidget *pCImageProxyWidgetReflectionInstance = new QGraphicsProxyWidget(0, Qt::Window );
-	
-		QImage *img = new QImage(scaleFromImage(QImage::fromData(image)));
-	
-		img = mirrorImage(img);
+    QObject::connect(pCImageProxyWidgetInstance,SIGNAL(imageZoomedIn()),imageItem,SLOT(imageZoomedIn()));
+    QObject::connect(pCImageProxyWidgetInstance,SIGNAL(imageZoomedOut()),imageItem,SLOT(imageZoomedOut()));
 
-		imageReflcetionItem->setPixmap(QPixmap::fromImage(*img));
-	
+    m_Row ++;
 
-		QRectF rect = pCImageProxyWidgetReflectionInstance->boundingRect();
-		rect.setWidth(ImageWidth+10);
-		rect.setHeight(ImageHeight+10);
-	
-		pCImageProxyWidgetReflectionInstance->setWidget(imageReflcetionItem);
-		pCImageProxyWidgetReflectionInstance->setPos(m_Column * rect.width() * 1.05, (m_Row) * rect.height() * 1.3 );
-		pCImageProxyWidgetReflectionInstance->setCacheMode ( QGraphicsItem::ItemCoordinateCache);
-		
-		m_GraphicsScene.addItem ( pCImageProxyWidgetReflectionInstance );
-	}
+    if (m_Row == 3)
+    {
+
+        QLabel *imageReflcetionItem = new QLabel();
+        QGraphicsProxyWidget *pCImageProxyWidgetReflectionInstance = new QGraphicsProxyWidget(0, Qt::Window );
+
+        QImage *img = new QImage(scaleFromImage(QImage::fromData(image)));
+
+        img = mirrorImage(img);
+
+        imageReflcetionItem->setPixmap(QPixmap::fromImage(*img));
+
+
+        QRectF rect = pCImageProxyWidgetReflectionInstance->boundingRect();
+        rect.setWidth(ImageWidth+10);
+        rect.setHeight(ImageHeight+10);
+
+        pCImageProxyWidgetReflectionInstance->setWidget(imageReflcetionItem);
+        pCImageProxyWidgetReflectionInstance->setPos(m_Column * rect.width() * 1.05, (m_Row) * rect.height() * 1.3 );
+        pCImageProxyWidgetReflectionInstance->setCacheMode ( QGraphicsItem::ItemCoordinateCache);
+
+        m_GraphicsScene.addItem ( pCImageProxyWidgetReflectionInstance );
+    }
 
 }
 
 
 void CMainPictureWallArea::setMessage(const QString &text)
 {
-	QGraphicsTextItem *textMessage = new QGraphicsTextItem(text);
-	textMessage->setFont(QFont("Times", 20));
-	textMessage->setDefaultTextColor(QColor(255,255,255,255));
-	textMessage->setPos(m_Column * textMessage->boundingRect().width() * 1.05, m_Row * textMessage->boundingRect().height() * 1.3 );
+    QGraphicsTextItem *textMessage = new QGraphicsTextItem(text);
+    textMessage->setFont(QFont("Times", 20));
+    textMessage->setDefaultTextColor(QColor(255,255,255,255));
+    textMessage->setPos(m_Column * textMessage->boundingRect().width() * 1.05, m_Row * textMessage->boundingRect().height() * 1.3 );
 
-	m_GraphicsScene.addItem ( textMessage );
-	
-	m_GraphicsScene.setSceneRect ( m_GraphicsScene.itemsBoundingRect() );
+    m_GraphicsScene.addItem ( textMessage );
+
+    m_GraphicsScene.setSceneRect ( m_GraphicsScene.itemsBoundingRect() );
 }
 
 
 void CMainPictureWallArea::changeZoomLevelByFactor(EZoomFocus zoom)
 {
 
-	if(zoom == IN)
-	{
-		m_ZoomFactor = m_ZoomFactor + 0.25;
-		if((m_ZoomFactor -1) > 0)
-		{
-			m_ZoomFactor =1;
-		}
-	}else
-	{
+    if (zoom == IN)
+    {
+        m_ZoomFactor = m_ZoomFactor + 0.25;
+        if ((m_ZoomFactor -1) > 0)
+        {
+            m_ZoomFactor =1;
+        }
+    }
+    else
+    {
 
-		m_ZoomFactor = m_ZoomFactor - 0.25;
+        m_ZoomFactor = m_ZoomFactor - 0.25;
 
-		if((m_ZoomFactor -0.25) < 0)
-		{
-			m_ZoomFactor =0.25;
-		}
-	
-	}
+        if ((m_ZoomFactor -0.25) < 0)
+        {
+            m_ZoomFactor =0.25;
+        }
 
-	     this->setTransform ( QTransform()
-             .translate ( this->contentsRect().width() , this->contentsRect().height() )
-             .scale ( m_ZoomFactor , m_ZoomFactor)
-             .translate ( -this->contentsRect().width() , -this->contentsRect().height() ));
+    }
+
+    this->setTransform ( QTransform()
+                         .translate ( this->contentsRect().width() , this->contentsRect().height() )
+                         .scale ( m_ZoomFactor , m_ZoomFactor)
+                         .translate ( -this->contentsRect().width() , -this->contentsRect().height() ));
 
 }
 
 
 void CMainPictureWallArea::wheelEvent ( QWheelEvent * e )
 {
-     int numDegrees = e->delta() / 8;
-     int numSteps = numDegrees / 15;
+    int numDegrees = e->delta() / 8;
+    int numSteps = numDegrees / 15;
 
-	if(numSteps > 0)
-	{
-		changeZoomLevelByFactor(CMainPictureWallArea::IN);
-	}else if(numSteps < 0)
-	{
-		changeZoomLevelByFactor(CMainPictureWallArea::OUT);
-	}
+    if (numSteps > 0)
+    {
+        changeZoomLevelByFactor(CMainPictureWallArea::IN);
+    }
+    else if (numSteps < 0)
+    {
+        changeZoomLevelByFactor(CMainPictureWallArea::OUT);
+    }
 
 
-	QGraphicsView::wheelEvent(e);
+    QGraphicsView::wheelEvent(e);
 
 }
 
 
 void CMainPictureWallArea::mousePressEvent ( QMouseEvent *e)
 {
-	if(e->button() == Qt::LeftButton)
-	{
-		m_MouseDeltaValueForPressedEvent = e->x();
-		m_MouseButtonPressed = true;
-	}
-	QGraphicsView::mousePressEvent (e);
+    if (e->button() == Qt::LeftButton)
+    {
+        m_MouseDeltaValueForPressedEvent = e->x();
+        m_MouseButtonPressed = true;
+    }
+    QGraphicsView::mousePressEvent (e);
 }
 
 void CMainPictureWallArea::mouseReleaseEvent ( QMouseEvent *e )
 {
-	if(e->button() == Qt::LeftButton)
-	{
-		m_MouseButtonPressed = false;
-	}
+    if (e->button() == Qt::LeftButton)
+    {
+        m_MouseButtonPressed = false;
+    }
 
-	QGraphicsView::mouseReleaseEvent(e);
+    QGraphicsView::mouseReleaseEvent(e);
 }
 
 void CMainPictureWallArea::mouseMoveEvent ( QMouseEvent *e )
 {
-	int direction;
+    int direction;
 
-	if(m_MouseButtonPressed)
-	{
-		direction = m_MouseDeltaValueForPressedEvent -e->x();
-		
-		this->horizontalScrollBar()->setValue(this->horizontalScrollBar()->value() + direction);
+    if (m_MouseButtonPressed)
+    {
+        direction = m_MouseDeltaValueForPressedEvent -e->x();
 
-		m_MouseDeltaValueForPressedEvent=e->x();
-	}
+        this->horizontalScrollBar()->setValue(this->horizontalScrollBar()->value() + direction);
 
-	QGraphicsView::mouseMoveEvent(e);
+        m_MouseDeltaValueForPressedEvent=e->x();
+    }
+
+    QGraphicsView::mouseMoveEvent(e);
 }
 
 void CMainPictureWallArea::showGoogleImageResult(QHash<QString,QString> result)
 {
-	mainWidth = this->geometry().width();
-	mainHeight = this->geometry().height();
+    mainWidth = this->geometry().width();
+    mainHeight = this->geometry().height();
 
-	CHttpImageDownloader *pDownloadImageFromGoogle = new CHttpImageDownloader(result["tbUrl"],result["url"]);
+    CHttpImageDownloader *pDownloadImageFromGoogle = new CHttpImageDownloader(result["tbUrl"],result["url"]);
 
-	connect(pDownloadImageFromGoogle,SIGNAL(downloadComplete(QByteArray,QString)),pDownloadImageFromGoogle,SLOT(deleteLater()));
-	connect(pDownloadImageFromGoogle,SIGNAL(downloadComplete(QByteArray,QString)),this,SLOT(showImageOnWall(QByteArray,QString )));
-	
-	pDownloadImageFromGoogle->start();
+    connect(pDownloadImageFromGoogle,SIGNAL(downloadComplete(QByteArray,QString)),pDownloadImageFromGoogle,SLOT(deleteLater()));
+    connect(pDownloadImageFromGoogle,SIGNAL(downloadComplete(QByteArray,QString)),this,SLOT(showImageOnWall(QByteArray,QString )));
+
+    pDownloadImageFromGoogle->start();
 }
 
 

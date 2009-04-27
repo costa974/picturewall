@@ -1,7 +1,7 @@
 //
 // C++ Implementation: HttpImageDownloader
 //
-// Description: 
+// Description:
 //
 //
 // Author: vishwajeet <vishwajeet.dusane@gmail.com>, (C) 2009
@@ -14,10 +14,10 @@
 #include <QUrl>
 
 CHttpImageDownloader::CHttpImageDownloader(const QString &imageUrl,const QString &imageMainUrl,QObject *parent)
- : QThread(parent)
+        : QThread(parent)
 {
     m_ImageUrl = imageUrl;
-    m_ImageMainUrl = imageMainUrl; 	
+    m_ImageMainUrl = imageMainUrl;
     http = new QHttp(this);
 
     connect(http, SIGNAL(requestFinished(int, bool)),
@@ -35,29 +35,26 @@ CHttpImageDownloader::~CHttpImageDownloader()
 
 void CHttpImageDownloader::run()
 {
-	downloadImage(m_ImageUrl);
+    downloadImage(m_ImageUrl);
 }
 
 
 void CHttpImageDownloader::setDownloadImageUrl(const QString &imageUrl)
 {
-	this->m_ImageUrl = imageUrl;
+    this->m_ImageUrl = imageUrl;
 
 }
 
 void CHttpImageDownloader::downloadImage(const QString &imageUrl)
 {
 
-   buffer.open(QBuffer::ReadWrite);
+    buffer.open(QBuffer::ReadWrite);
 
-	QUrl url(imageUrl);	
-    //QUrl url("http://images.google.com/images?q=tbn:gJEs0EK6FPH7CM:http://topnews.in/light/files/paris_hilton22.jpg");
-   //	QUrl url("http://topnews.in/light/files/paris_hilton22.jpg");
-
+    QUrl url(imageUrl);
 
     QHttp::ConnectionMode mode = url.scheme().toLower() == "https" ? QHttp::ConnectionModeHttps : QHttp::ConnectionModeHttp;
     http->setHost(url.host(), mode, url.port() == -1 ? 0 : url.port());
-    
+
     if (!url.userName().isEmpty())
         http->setUser(url.userName(), url.password());
 
@@ -70,15 +67,16 @@ void CHttpImageDownloader::httpRequestFinished(int requestId, bool error)
     if (requestId != httpGetId)
         return;
 
-	emit downloadComplete(buffer.data(),m_ImageMainUrl);
-	
-	buffer.close();	
- // download complete
+    emit downloadComplete(buffer.data(),m_ImageMainUrl);
+
+    buffer.close();
+
 }
 
 void CHttpImageDownloader::readResponseHeader(const QHttpResponseHeader &responseHeader)
 {
-    switch (responseHeader.statusCode()) {
+    switch (responseHeader.statusCode())
+    {
     case 200:                   // Ok
     case 301:                   // Moved Permanently
     case 302:                   // Found
@@ -93,16 +91,14 @@ void CHttpImageDownloader::readResponseHeader(const QHttpResponseHeader &respons
 
 void CHttpImageDownloader::updateDataReadProgress(int bytesRead, int totalBytes)
 {
- //   progressDialog->setMaximum(totalBytes);
- //   progressDialog->setValue(bytesRead);
-	int downloadPercentComplete =0;
+    int downloadPercentComplete =0;
 
-	if(bytesRead >1)
-	{
-		downloadPercentComplete = ((double)bytesRead/totalBytes) * 100; 
-	}
-	
-	emit downloading(downloadPercentComplete);
+    if (bytesRead >1)
+    {
+        downloadPercentComplete = ((double)bytesRead/totalBytes) * 100;
+    }
+
+    emit downloading(downloadPercentComplete);
 }
 
 

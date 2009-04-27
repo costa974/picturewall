@@ -27,25 +27,64 @@
 #include "ImageHolder.h"
 
 /**
+	CustomLabel class is container class which holds the CImageHolder class object.
+		
+
+	@see CImageHolder
+
 	@author vishwajeet <vishwajeet.dusane@gmail.com>
 */
 class CustomLabel : public QDialog
 {
-Q_OBJECT
+    Q_OBJECT
 public:
-	CustomLabel ( QWidget *parent = 0 );
-	virtual	~CustomLabel();
+    /**
+     *
+     * @param parent
+     */
+    CustomLabel ( QWidget *parent = 0 );
+    /**
+     * 
+     */
+    virtual	~CustomLabel();
 
 public slots:
-		void setPixmap(const QPixmap& );
-		void setImagePath(const QString&);
-		void imageZoomedIn();
-		void imageZoomedOut();
-		
+    /**
+     *    This function sets pixmap to CImageHolder object. This function is called when image within CImageHolder object needs to change  
+     *    
+     * @see CImageHolder
+     * 
+     * @param  pixmap 
+     */
+    void setPixmap(const QPixmap& pixmap);
+
+    /**
+     * 
+     * This function sets the absoulute path of the image, Whever image zoom is called CImageHolder class loads the image from this path and set the scaled image to zoomed CImageHolder widget  
+     * @see CImageHolder
+     * 
+     * @param  imagePath abosolute path of the image which needs to be displayed while image zoom in is called
+     */
+    void setImagePath(const QString& imagePath);
+
+    /**
+     * This slot is called whenever zoom in on respective CImageHolder widget is called. In this application, This slot is called when mouse pressed event occurs on image. 
+	@see CImageHolder
+
+     */
+    void imageZoomedIn();
+
+    /**
+     * This slot is called whenever zoom out on respective CImageHolder widget is called. In this application, This slot is called when mouse pressed event occurs on image and image is already zoomed in state and also when mouse is moved away from the zoomed in image. 
+
+	@see CImageHolder
+     */
+    void imageZoomedOut();
+
 private:
 		
-		CImageHolder *m_pImageHolderInstance;
-		QPixmap m_VisibleImageState;
-};	
+    CImageHolder *m_pImageHolderInstance;
+    QPixmap m_VisibleImageState;
+};
 
 #endif

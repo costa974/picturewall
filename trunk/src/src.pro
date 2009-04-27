@@ -7,7 +7,7 @@ TARGET = picturewall
 OBJECTS_DIR = ../bin/tmp
 MOC_DIR = ../bin/tmp
 DESTDIR = ../bin
-QT += gui
+QT += gui webkit network
 DEPENDPATH += .
 INCLUDEPATH += .
 CONFIG += warn_on \
@@ -19,11 +19,15 @@ HEADERS += CustomLabel.h \
            ImageHolder.h \
            ImageProxyWidget.h \
            MainPictureWallArea.h \
-           PictureWallMainWindow.h
+           PictureWallMainWindow.h \
+ GoogleSearcher.h \
+ HttpImageDownloader.h
 FORMS += ImageContainer.ui PictureWallMainWindow.ui
 SOURCES += CustomLabel.cpp \
            ImageHolder.cpp \
            ImageProxyWidget.cpp \
            main.cpp \
            MainPictureWallArea.cpp \
-           PictureWallMainWindow.cpp
+           PictureWallMainWindow.cpp \
+ 		GoogleSearcher.cpp \
+ HttpImageDownloader.cpp

@@ -1,11 +1,43 @@
-READ THIS IN ORDER TO COMPILE THE Qt4 TEMPLATE
-----------------------------------------------
 
-Before compiling, check the Qt Options, go to 
-Project->Project Options->C++ Support and open the Qt Options tab.
+DESCRIPTION / FEATURE:
+^^^^^^^^^^^^^^^^^^^^^^
+Picure Wall is an application to view local images as well as search queried images on google.com with rich set of UI 
+This application is developed using Qt4.5.0 
+  - Cross compile 
+  - Browse local images as well as search images on google.com
+  - interactive UI
+  - Animated image zoom in and zoom out on mouse pressed
+  - Entire images zoom in and zoom out on mouse wheel 
+  - Horizontal scrolling of images on mouse drag in respective horizontal direction
+  - Fast loading of images on view using QtConcurrent 
+	
+HOW TO BUILD?:
+^^^^^^^^^^^^^^
+Linux:
+	qmake (same or higher version of  Qt4.5.0)
+	make
+Windows:
+	qmake (same or higher version of Qt4.5.0)
+	nmake
+cd bin
 
-Check that the Qt installation directory is correct for the Qt version you've chosen.
+RUN "picturewall" binary from this directory
 
-------------------
-Vishwajeet Dusane
-July 2006
+
+KNOWN ISSUES/BUGS:
+^^^^^^^^^^^^^^^^^
+  - When search query is submitted on google server, and search option is changed to local image browse,still search queries are popupated inside view. 
+	This is because when result are fetched from the google server are still downloading and once the download of those thumbnail view images are done, those images are populated inside view regardless wheather view is changed to other view or other search query.
+
+  - Google search images might get duplicate images, i.e. Imagse populated inside view might be duplicated 
+	This is cause of the query sent over google server returns searched result which has duplicate image URL
+
+HARDWARE/SOFTWARE:
+^^^^^^^^^^^^^^^^^^
+
+Build on Linux (Kubuntu 8.10) with Qt4.5.0 library and KDevelop
+
+
+DEVELOPER:
+^^^^^
+Vishwajeet Dusane vishwajeet.dusane@gmail.com

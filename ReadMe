@@ -11,6 +11,30 @@ This application is developed using Qt4.5.0
   - Horizontal scrolling of images on mouse drag in respective horizontal direction
   - Fast loading of images on view using QtConcurrent 
 	
+
+CHANGELOG 
+^^^^^^^^^
+  - Add Icon to application 
+  - Remove radio button for search area and also remove search bar 
+  - Add frames for images 
+  - Add transperent black round rect for messages 
+  - Add smooth animation for scrolling those images 
+  - Remove same images for google search 
+  - Image zoom into center of the screen
+  - Recursive directory search
+  - Hide scoll bar 
+  - Add you tube video 
+  - Fade in effect for new images 
+  - Image's title 
+  - Save option for google images 
+  - Search images within opened images 
+  - sort images 
+  - Bug fix: Progress bar, once 100% done set 0 again 
+  - Enhancement : image downloading should start immediatly 
+  - Bug fix: google search for one after other does not clean previous search images	
+  - Bug fix: Remove debug messages 
+
+
 HOW TO BUILD?:
 ^^^^^^^^^^^^^^
 Linux:
